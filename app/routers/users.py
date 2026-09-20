@@ -16,6 +16,26 @@ router = APIRouter(
     tags=["Users"]
 )
 
+@router.get(
+    "",
+    response_model=list[UserResponse]
+)
+def list_users(
+    current_user: User = Depends(
+        require_roles("admin", "manager")
+    ),
+    db: Session = Depends(get_db)
+):
+    users = (
+        db.query(User)
+        .filter(
+            User.organization_id == current_user.organization_id
+        )
+        .order_by(User.name.asc())
+        .all()
+    )
+
+    return users
 
 @router.post(
     "",
