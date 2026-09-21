@@ -93,6 +93,32 @@ def create_sla_policy(
 
 
 # -------------------------------------------------
+# GET SLA POLICIES
+# -------------------------------------------------
+
+@router.get(
+    "/sla-policies",
+    response_model=list[SLAPolicyResponse]
+)
+def get_sla_policies(
+    current_user: User = Depends(
+        require_roles("admin", "manager")
+    ),
+    db: Session = Depends(get_db)
+):
+    policies = (
+        db.query(SLAPolicy)
+        .filter(
+            SLAPolicy.organization_id == current_user.organization_id
+        )
+        .order_by(SLAPolicy.priority.asc())
+        .all()
+    )
+
+    return policies
+
+
+# -------------------------------------------------
 # INCIDENT SLA STATUS
 # -------------------------------------------------
 
