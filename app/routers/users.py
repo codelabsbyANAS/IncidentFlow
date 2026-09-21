@@ -2,12 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import require_roles
+from app.dependencies import get_current_user, require_roles
 from app.models.user import User
+
 from app.schemas.user import (
     AdminUserCreate,
     UserResponse
 )
+
+from app.schemas.user_directory import UserDirectoryResponse
+
 from app.security import hash_password
 
 
@@ -15,6 +19,39 @@ router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
+
+
+# -------------------------------------------------
+# SAFE USER DIRECTORY
+# Available to every authenticated tenant user
+# Returns only id, name, and role
+# -------------------------------------------------
+
+@router.get(
+    "/directory",
+    response_model=list[UserDirectoryResponse]
+)
+def user_directory(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    users = (
+        db.query(User)
+        .filter(
+            User.organization_id == current_user.organization_id,
+            User.is_active == True
+        )
+        .order_by(User.name.asc())
+        .all()
+    )
+
+    return users
+
+
+# -------------------------------------------------
+# FULL USER LIST
+# Admin / Manager only
+# -------------------------------------------------
 
 @router.get(
     "",
@@ -36,6 +73,12 @@ def list_users(
     )
 
     return users
+
+
+# -------------------------------------------------
+# CREATE USER
+# Admin only
+# -------------------------------------------------
 
 @router.post(
     "",
