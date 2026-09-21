@@ -12,6 +12,10 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_roles
+from app.incident_access import (
+    build_incident_query,
+    get_accessible_incident
+)
 
 from app.models.user import User
 from app.models.incident import Incident
@@ -143,11 +147,9 @@ def get_incidents(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    query = (
-        db.query(Incident)
-        .filter(
-            Incident.organization_id == current_user.organization_id
-        )
+    query = build_incident_query(
+    db=db,
+    current_user=current_user
     )
 
     if status_filter:
@@ -235,23 +237,13 @@ def get_incident(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    incident = (
-        db.query(Incident)
-        .filter(
-            Incident.id == incident_id,
-            Incident.organization_id == current_user.organization_id
-        )
-        .first()
+    incident = get_accessible_incident(
+        db=db,
+        current_user=current_user,
+        incident_id=incident_id
     )
 
-    if not incident:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Incident not found."
-        )
-
     return incident
-
 
 # -------------------------------------------------
 # ASSIGN INCIDENT
