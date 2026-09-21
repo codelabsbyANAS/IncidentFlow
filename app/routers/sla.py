@@ -119,6 +119,84 @@ def get_sla_policies(
 
 
 # -------------------------------------------------
+# UPDATE SLA POLICY
+# -------------------------------------------------
+
+@router.patch(
+    "/sla-policies/{policy_id}",
+    response_model=SLAPolicyResponse
+)
+def update_sla_policy(
+    policy_id: int,
+    policy_data: SLAPolicyCreate,
+    current_user: User = Depends(
+        require_roles("admin", "manager")
+    ),
+    db: Session = Depends(get_db)
+):
+    policy = (
+        db.query(SLAPolicy)
+        .filter(
+            SLAPolicy.id == policy_id,
+            SLAPolicy.organization_id == current_user.organization_id
+        )
+        .first()
+    )
+
+    if not policy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SLA policy not found."
+        )
+
+    priority = policy_data.priority.lower()
+
+    allowed_priorities = {
+        "low",
+        "medium",
+        "high",
+        "critical"
+    }
+
+    if priority not in allowed_priorities:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Priority must be low, medium, high, or critical."
+        )
+
+    if policy_data.resolution_minutes < policy_data.response_minutes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Resolution time cannot be shorter than response time."
+        )
+
+    duplicate_policy = (
+        db.query(SLAPolicy)
+        .filter(
+            SLAPolicy.organization_id == current_user.organization_id,
+            SLAPolicy.priority == priority,
+            SLAPolicy.id != policy.id
+        )
+        .first()
+    )
+
+    if duplicate_policy:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An SLA policy already exists for this priority."
+        )
+
+    policy.priority = priority
+    policy.response_minutes = policy_data.response_minutes
+    policy.resolution_minutes = policy_data.resolution_minutes
+
+    db.commit()
+    db.refresh(policy)
+
+    return policy
+
+
+# -------------------------------------------------
 # INCIDENT SLA STATUS
 # -------------------------------------------------
 
