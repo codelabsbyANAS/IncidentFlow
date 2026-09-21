@@ -11,6 +11,7 @@ from app.schemas.user import (
 )
 
 from app.schemas.user_directory import UserDirectoryResponse
+from app.schemas.user_password import UserPasswordReset
 
 from app.security import hash_password
 
@@ -38,7 +39,8 @@ def user_directory(
     users = (
         db.query(User)
         .filter(
-            User.organization_id == current_user.organization_id,
+            User.organization_id
+            == current_user.organization_id,
             User.is_active == True
         )
         .order_by(User.name.asc())
@@ -66,7 +68,8 @@ def list_users(
     users = (
         db.query(User)
         .filter(
-            User.organization_id == current_user.organization_id
+            User.organization_id
+            == current_user.organization_id
         )
         .order_by(User.name.asc())
         .all()
@@ -126,7 +129,9 @@ def create_user_by_admin(
         organization_id=current_user.organization_id,
         name=user_data.name,
         email=email,
-        password_hash=hash_password(user_data.password),
+        password_hash=hash_password(
+            user_data.password
+        ),
         role=role,
         is_active=True
     )
@@ -136,3 +141,46 @@ def create_user_by_admin(
     db.refresh(new_user)
 
     return new_user
+
+
+# -------------------------------------------------
+# RESET USER PASSWORD
+# Admin only
+# -------------------------------------------------
+
+@router.patch(
+    "/{user_id}/reset-password"
+)
+def reset_user_password(
+    user_id: int,
+    password_data: UserPasswordReset,
+    current_user: User = Depends(
+        require_roles("admin")
+    ),
+    db: Session = Depends(get_db)
+):
+    user = (
+        db.query(User)
+        .filter(
+            User.id == user_id,
+            User.organization_id
+            == current_user.organization_id
+        )
+        .first()
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found."
+        )
+
+    user.password_hash = hash_password(
+        password_data.new_password
+    )
+
+    db.commit()
+
+    return {
+        "message": "Password reset successfully."
+    }
