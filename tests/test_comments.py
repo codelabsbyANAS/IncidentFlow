@@ -80,7 +80,7 @@ def test_internal_comment_privacy():
     incident_response = client.post(
         "/incidents",
         headers={
-            "Authorization": f"Bearer {admin_token}"
+            "Authorization": f"Bearer {customer_token}"
         },
         json={
             "title": "Comment privacy test",

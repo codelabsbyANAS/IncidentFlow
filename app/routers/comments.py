@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.history import record_incident_history
+from app.incident_access import get_accessible_incident
 
 from app.models.user import User
-from app.models.incident import Incident
 from app.models.incident_comment import IncidentComment
 
 from app.schemas.incident_comment import (
@@ -22,6 +22,10 @@ router = APIRouter(
 )
 
 
+# -------------------------------------------------
+# CREATE INCIDENT COMMENT
+# -------------------------------------------------
+
 @router.post(
     "/incidents/{incident_id}/comments",
     response_model=IncidentCommentResponse,
@@ -33,22 +37,16 @@ def create_incident_comment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    incident = (
-        db.query(Incident)
-        .filter(
-            Incident.id == incident_id,
-            Incident.organization_id == current_user.organization_id
-        )
-        .first()
+    incident = get_accessible_incident(
+        db=db,
+        current_user=current_user,
+        incident_id=incident_id
     )
 
-    if not incident:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Incident not found."
-        )
-
-    if comment_data.is_internal and current_user.role == "customer":
+    if (
+        comment_data.is_internal
+        and current_user.role == "customer"
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Customers cannot create internal notes."
@@ -64,13 +62,22 @@ def create_incident_comment(
 
     db.add(comment)
 
-    # Record first public response from support staff
+    # -------------------------------------------------
+    # FIRST PUBLIC STAFF RESPONSE
+    # -------------------------------------------------
+
     if (
-        current_user.role in {"agent", "manager", "admin"}
+        current_user.role in {
+            "agent",
+            "manager",
+            "admin"
+        }
         and not comment_data.is_internal
         and incident.first_response_at is None
     ):
-        incident.first_response_at = datetime.now(timezone.utc)
+        incident.first_response_at = datetime.now(
+            timezone.utc
+        )
 
         record_incident_history(
             db=db,
@@ -88,6 +95,10 @@ def create_incident_comment(
     return comment
 
 
+# -------------------------------------------------
+# GET INCIDENT COMMENTS
+# -------------------------------------------------
+
 @router.get(
     "/incidents/{incident_id}/comments",
     response_model=list[IncidentCommentResponse]
@@ -97,29 +108,22 @@ def get_incident_comments(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    incident = (
-        db.query(Incident)
-        .filter(
-            Incident.id == incident_id,
-            Incident.organization_id == current_user.organization_id
-        )
-        .first()
+    incident = get_accessible_incident(
+        db=db,
+        current_user=current_user,
+        incident_id=incident_id
     )
-
-    if not incident:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Incident not found."
-        )
 
     query = (
         db.query(IncidentComment)
         .filter(
             IncidentComment.incident_id == incident.id,
-            IncidentComment.organization_id == current_user.organization_id
+            IncidentComment.organization_id
+            == current_user.organization_id
         )
     )
 
+    # Customers must never see internal notes.
     if current_user.role == "customer":
         query = query.filter(
             IncidentComment.is_internal == False

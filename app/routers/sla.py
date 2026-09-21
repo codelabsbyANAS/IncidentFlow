@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_roles
+from app.incident_access import get_accessible_incident
 
 from app.models.user import User
-from app.models.incident import Incident
 from app.models.sla_policy import SLAPolicy
 from app.models.sla_escalation import SLAEscalation
 
@@ -57,7 +57,10 @@ def create_sla_policy(
             detail="Priority must be low, medium, high, or critical."
         )
 
-    if policy_data.resolution_minutes < policy_data.response_minutes:
+    if (
+        policy_data.resolution_minutes
+        < policy_data.response_minutes
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Resolution time cannot be shorter than response time."
@@ -66,7 +69,8 @@ def create_sla_policy(
     existing_policy = (
         db.query(SLAPolicy)
         .filter(
-            SLAPolicy.organization_id == current_user.organization_id,
+            SLAPolicy.organization_id
+            == current_user.organization_id,
             SLAPolicy.priority == priority
         )
         .first()
@@ -109,7 +113,8 @@ def get_sla_policies(
     policies = (
         db.query(SLAPolicy)
         .filter(
-            SLAPolicy.organization_id == current_user.organization_id
+            SLAPolicy.organization_id
+            == current_user.organization_id
         )
         .order_by(SLAPolicy.priority.asc())
         .all()
@@ -138,7 +143,8 @@ def update_sla_policy(
         db.query(SLAPolicy)
         .filter(
             SLAPolicy.id == policy_id,
-            SLAPolicy.organization_id == current_user.organization_id
+            SLAPolicy.organization_id
+            == current_user.organization_id
         )
         .first()
     )
@@ -164,7 +170,10 @@ def update_sla_policy(
             detail="Priority must be low, medium, high, or critical."
         )
 
-    if policy_data.resolution_minutes < policy_data.response_minutes:
+    if (
+        policy_data.resolution_minutes
+        < policy_data.response_minutes
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Resolution time cannot be shorter than response time."
@@ -173,7 +182,8 @@ def update_sla_policy(
     duplicate_policy = (
         db.query(SLAPolicy)
         .filter(
-            SLAPolicy.organization_id == current_user.organization_id,
+            SLAPolicy.organization_id
+            == current_user.organization_id,
             SLAPolicy.priority == priority,
             SLAPolicy.id != policy.id
         )
@@ -209,20 +219,11 @@ def get_incident_sla_status(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    incident = (
-        db.query(Incident)
-        .filter(
-            Incident.id == incident_id,
-            Incident.organization_id == current_user.organization_id
-        )
-        .first()
+    incident = get_accessible_incident(
+        db=db,
+        current_user=current_user,
+        incident_id=incident_id
     )
-
-    if not incident:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Incident not found."
-        )
 
     if (
         incident.sla_policy_id is None
@@ -246,7 +247,10 @@ def get_incident_sla_status(
 
     # Response SLA
     if incident.first_response_at:
-        if incident.first_response_at <= incident.response_due_at:
+        if (
+            incident.first_response_at
+            <= incident.response_due_at
+        ):
             response_status = "met"
         else:
             response_status = "breached"
@@ -258,7 +262,10 @@ def get_incident_sla_status(
 
     # Resolution SLA
     if incident.resolved_at:
-        if incident.resolved_at <= incident.resolution_due_at:
+        if (
+            incident.resolved_at
+            <= incident.resolution_due_at
+        ):
             resolution_status = "met"
         else:
             resolution_status = "breached"
@@ -297,20 +304,11 @@ def evaluate_incident_escalations(
     ),
     db: Session = Depends(get_db)
 ):
-    incident = (
-        db.query(Incident)
-        .filter(
-            Incident.id == incident_id,
-            Incident.organization_id == current_user.organization_id
-        )
-        .first()
+    incident = get_accessible_incident(
+        db=db,
+        current_user=current_user,
+        incident_id=incident_id
     )
-
-    if not incident:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Incident not found."
-        )
 
     evaluate_sla_escalations(
         db=db,
@@ -323,9 +321,12 @@ def evaluate_incident_escalations(
         db.query(SLAEscalation)
         .filter(
             SLAEscalation.incident_id == incident.id,
-            SLAEscalation.organization_id == current_user.organization_id
+            SLAEscalation.organization_id
+            == current_user.organization_id
         )
-        .order_by(SLAEscalation.escalation_level.asc())
+        .order_by(
+            SLAEscalation.escalation_level.asc()
+        )
         .all()
     )
 
@@ -345,28 +346,22 @@ def get_incident_escalations(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    incident = (
-        db.query(Incident)
-        .filter(
-            Incident.id == incident_id,
-            Incident.organization_id == current_user.organization_id
-        )
-        .first()
+    incident = get_accessible_incident(
+        db=db,
+        current_user=current_user,
+        incident_id=incident_id
     )
-
-    if not incident:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Incident not found."
-        )
 
     escalations = (
         db.query(SLAEscalation)
         .filter(
             SLAEscalation.incident_id == incident.id,
-            SLAEscalation.organization_id == current_user.organization_id
+            SLAEscalation.organization_id
+            == current_user.organization_id
         )
-        .order_by(SLAEscalation.escalation_level.asc())
+        .order_by(
+            SLAEscalation.escalation_level.asc()
+        )
         .all()
     )
 

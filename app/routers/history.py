@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user
+from app.incident_access import get_accessible_incident
 
 from app.models.user import User
-from app.models.incident import Incident
 from app.models.incident_history import IncidentHistory
 
 from app.schemas.incident_history import IncidentHistoryResponse
@@ -25,28 +25,22 @@ def get_incident_history(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    incident = (
-        db.query(Incident)
-        .filter(
-            Incident.id == incident_id,
-            Incident.organization_id == current_user.organization_id
-        )
-        .first()
+    incident = get_accessible_incident(
+        db=db,
+        current_user=current_user,
+        incident_id=incident_id
     )
-
-    if not incident:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Incident not found."
-        )
 
     history = (
         db.query(IncidentHistory)
         .filter(
             IncidentHistory.incident_id == incident.id,
-            IncidentHistory.organization_id == current_user.organization_id
+            IncidentHistory.organization_id
+            == current_user.organization_id
         )
-        .order_by(IncidentHistory.created_at.asc())
+        .order_by(
+            IncidentHistory.created_at.asc()
+        )
         .all()
     )
 

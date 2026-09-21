@@ -254,3 +254,134 @@ def test_customer_can_only_access_own_incidents():
 
     assert incident_a_id in incident_ids
     assert incident_b_id not in incident_ids
+
+
+def test_customer_cannot_access_other_customer_nested_incident_data():
+    # -------------------------------------------------
+    # Create organization + admin
+    # -------------------------------------------------
+    signup_response = client.post(
+        "/auth/signup",
+        json={
+            "organization_name": "Nested Security Company",
+            "organization_slug": "nested-security-company",
+            "admin_name": "Nested Security Admin",
+            "admin_email": "nested-admin@test.com",
+            "password": "AdminPass123"
+        }
+    )
+
+    assert signup_response.status_code == 201
+
+    admin_token = signup_response.json()["access_token"]
+
+    # -------------------------------------------------
+    # Admin creates Customer A
+    # -------------------------------------------------
+    customer_a_response = client.post(
+        "/users",
+        headers={
+            "Authorization": f"Bearer {admin_token}"
+        },
+        json={
+            "name": "Nested Customer A",
+            "email": "nested-customer-a@test.com",
+            "password": "CustomerPass123",
+            "role": "customer"
+        }
+    )
+
+    assert customer_a_response.status_code == 201
+
+    # -------------------------------------------------
+    # Admin creates Customer B
+    # -------------------------------------------------
+    customer_b_response = client.post(
+        "/users",
+        headers={
+            "Authorization": f"Bearer {admin_token}"
+        },
+        json={
+            "name": "Nested Customer B",
+            "email": "nested-customer-b@test.com",
+            "password": "CustomerPass123",
+            "role": "customer"
+        }
+    )
+
+    assert customer_b_response.status_code == 201
+
+    # -------------------------------------------------
+    # Customer A logs in
+    # -------------------------------------------------
+    login_a = client.post(
+        "/auth/login",
+        json={
+            "email": "nested-customer-a@test.com",
+            "password": "CustomerPass123"
+        }
+    )
+
+    assert login_a.status_code == 200
+
+    customer_a_token = login_a.json()["access_token"]
+
+    # -------------------------------------------------
+    # Customer B logs in
+    # -------------------------------------------------
+    login_b = client.post(
+        "/auth/login",
+        json={
+            "email": "nested-customer-b@test.com",
+            "password": "CustomerPass123"
+        }
+    )
+
+    assert login_b.status_code == 200
+
+    customer_b_token = login_b.json()["access_token"]
+
+    # -------------------------------------------------
+    # Customer B creates a private incident
+    # -------------------------------------------------
+    incident_b_response = client.post(
+        "/incidents",
+        headers={
+            "Authorization": f"Bearer {customer_b_token}"
+        },
+        json={
+            "title": "Customer B nested security incident",
+            "description": "Customer A must not access any nested data.",
+            "priority": "high",
+            "category": "security-test"
+        }
+    )
+
+    assert incident_b_response.status_code == 201
+
+    incident_b_id = incident_b_response.json()["id"]
+
+    customer_a_headers = {
+        "Authorization": f"Bearer {customer_a_token}"
+    }
+
+    # -------------------------------------------------
+    # Customer A must not access ANY Customer B
+    # incident data, including nested resources
+    # -------------------------------------------------
+    protected_endpoints = [
+        f"/incidents/{incident_b_id}",
+        f"/incidents/{incident_b_id}/comments",
+        f"/incidents/{incident_b_id}/history",
+        f"/incidents/{incident_b_id}/sla-status",
+        f"/incidents/{incident_b_id}/escalations"
+    ]
+
+    for endpoint in protected_endpoints:
+        response = client.get(
+            endpoint,
+            headers=customer_a_headers
+        )
+
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Incident not found."
