@@ -1,0 +1,99 @@
+.team-page {
+  min-height: 100vh;
+  padding: 40px;
+  background: #f5f7fb;
+  color: #1e293b;
+}
+
+.team-back-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.team-header {
+  margin: 25px 0;
+}
+
+.team-header h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+}
+
+.team-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.team-card {
+  max-width: 650px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.team-card h2 {
+  margin-top: 0;
+}
+
+.team-form-group {
+  margin-bottom: 18px;
+}
+
+.team-form-group label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.team-form-group input,
+.team-form-group select {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  color: #1e293b;
+  font: inherit;
+}
+
+.team-create-button {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.team-create-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.team-error {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.team-success {
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.team-success p {
+  margin: 5px 0 0;
+}

@@ -1,0 +1,453 @@
+.incident-details-page {
+  min-height: 100vh;
+  background: #f6f8fc;
+  padding: 32px 42px 60px;
+  color: #1e293b;
+}
+
+.back-button {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.back-button:hover {
+  text-decoration: underline;
+}
+
+.incident-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.ticket-number {
+  display: block;
+  color: #2563eb;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.incident-details-header h1 {
+  margin: 0;
+  font-size: 32px;
+  color: #1e293b;
+}
+
+.incident-error {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.incident-details-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.incident-main-card,
+.incident-side-card,
+.comments-card,
+.sla-status-card,
+.history-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 26px;
+}
+
+.incident-main-card {
+  min-height: 230px;
+}
+
+.incident-main-card h2,
+.incident-side-card h2,
+.comments-card h2,
+.sla-status-card h2,
+.history-card h2 {
+  margin: 0 0 20px;
+  color: #1e293b;
+  font-size: 21px;
+}
+
+.incident-main-card p {
+  margin: 0;
+  line-height: 1.7;
+  color: #475569;
+}
+
+/* Assignment */
+
+.assignment-section {
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.assignment-section label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.assignment-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.assignment-controls select {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+}
+
+.assignment-controls button {
+  height: 44px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: #6f9af2;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.assignment-controls button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Status action */
+
+.status-action-button {
+  width: 100%;
+  min-height: 48px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status-action-button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.status-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Incident information */
+
+.incident-info-item {
+  padding: 13px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.incident-info-item:last-child {
+  border-bottom: none;
+}
+
+.incident-info-item span {
+  display: block;
+  margin-bottom: 5px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.incident-info-item strong {
+  display: block;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+/* Comments */
+
+.comments-card {
+  margin-bottom: 24px;
+}
+
+.comment-form textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  box-sizing: border-box;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  font: inherit;
+  outline: none;
+}
+
+.comment-form textarea:focus {
+  border-color: #2563eb;
+}
+
+.comment-form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.internal-note-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.comment-form-actions button {
+  border: none;
+  border-radius: 8px;
+  background: #6f9af2;
+  color: white;
+  padding: 12px 22px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comment-form-actions button:hover:not(:disabled) {
+  background: #5684e6;
+}
+
+.comment-form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.comment-error {
+  color: #dc2626;
+  margin-top: 10px;
+}
+
+.comment-list {
+  margin-top: 20px;
+}
+
+.comment-item {
+  padding: 18px 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.comment-header strong {
+  color: #1e293b;
+}
+
+.comment-header span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.comment-item p {
+  margin: 0;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.internal-comment {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid #fed7aa;
+  border-radius: 9px;
+  background: #fff7ed;
+}
+
+.internal-badge {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: #ffedd5;
+  color: #c2410c;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* SLA */
+
+.sla-status-card {
+  margin-bottom: 24px;
+}
+
+.sla-status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.sla-status-item {
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+}
+
+.sla-status-item > span {
+  display: block;
+  margin-bottom: 10px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.sla-status-item p {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.sla-state {
+  display: inline-block;
+  padding: 6px 11px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sla-state.met {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.sla-state.pending {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.sla-state.breached {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.sla-state.not_configured {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.sla-not-configured {
+  color: #64748b;
+}
+
+/* History */
+
+.history-card {
+  margin-bottom: 24px;
+}
+
+.history-timeline {
+  position: relative;
+}
+
+.history-item {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 22px;
+}
+
+.history-item:last-child {
+  padding-bottom: 0;
+}
+
+.history-item::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 18px;
+  bottom: -4px;
+  width: 2px;
+  background: #dbe3ef;
+}
+
+.history-item:last-child::before {
+  display: none;
+}
+
+.history-dot {
+  position: relative;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+.history-content {
+  flex: 1;
+}
+
+.history-content strong {
+  display: block;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.history-meta {
+  display: flex;
+  gap: 12px;
+  margin-top: 7px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .incident-details-page {
+    padding: 24px 18px 50px;
+  }
+
+  .incident-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sla-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-controls {
+    flex-direction: column;
+  }
+
+  .assignment-controls button {
+    width: 100%;
+  }
+
+  .comment-form-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .comment-form-actions button {
+    width: 100%;
+  }
+}

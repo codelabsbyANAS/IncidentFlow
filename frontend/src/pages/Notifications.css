@@ -1,0 +1,153 @@
+.notifications-page {
+  min-height: 100vh;
+  padding: 48px;
+  background: #f5f7fb;
+  color: #1e293b;
+}
+
+.notifications-back {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 28px;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.notifications-header h1 {
+  margin: 0 0 6px;
+  font-size: 34px;
+}
+
+.notifications-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.unread-counter {
+  padding: 8px 14px;
+  background: #dbeafe;
+  color: #2563eb;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
+
+.notification-unread {
+  border-left: 4px solid #2563eb;
+  background: #f8fbff;
+}
+
+.notification-read {
+  opacity: 0.8;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: capitalize;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+.notification-content p {
+  margin: 8px 0;
+}
+
+.notification-date {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.notification-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notification-actions button {
+  padding: 9px 13px;
+  border-radius: 7px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.view-incident-button {
+  border: none;
+  background: #2563eb;
+  color: white;
+}
+
+.mark-read-button {
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #334155;
+}
+
+.mark-read-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notifications-empty {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 70px 20px;
+  text-align: center;
+}
+
+.notifications-empty-icon {
+  font-size: 34px;
+  margin-bottom: 12px;
+}
+
+.notifications-empty h2 {
+  margin-bottom: 8px;
+}
+
+.notifications-empty p {
+  color: #64748b;
+}
+
+.notifications-error {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+}

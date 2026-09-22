@@ -1,0 +1,163 @@
+.sla-page {
+  min-height: 100vh;
+  padding: 48px;
+  background: #f5f7fb;
+  color: #1e293b;
+}
+
+.sla-back {
+  padding: 0;
+  margin-bottom: 28px;
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.sla-header {
+  margin-bottom: 28px;
+}
+
+.sla-header h1 {
+  margin: 0 0 6px;
+  font-size: 34px;
+}
+
+.sla-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.sla-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+}
+
+.sla-form-card,
+.sla-list-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.sla-form-card h2,
+.sla-list-card h2 {
+  margin-top: 0;
+}
+
+.sla-form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sla-form-card label {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sla-form-card select,
+.sla-form-card input {
+  padding: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  font: inherit;
+}
+
+.sla-form-card button {
+  margin-top: 14px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sla-form-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sla-error {
+  margin-top: 8px;
+  padding: 10px;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+}
+
+.sla-success {
+  margin-top: 8px;
+  padding: 10px;
+  background: #f0fdf4;
+  color: #15803d;
+  border-radius: 8px;
+}
+
+.sla-policy-list {
+  display: grid;
+  gap: 14px;
+}
+
+.sla-policy-item {
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.sla-policy-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sla-priority {
+  text-transform: capitalize;
+  font-weight: 700;
+}
+
+.sla-active {
+  padding: 4px 9px;
+  border-radius: 12px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sla-inactive {
+  padding: 4px 9px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.sla-times {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 18px;
+}
+
+.sla-times div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sla-times span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.sla-empty {
+  color: #64748b;
+}
