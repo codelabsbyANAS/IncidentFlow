@@ -7,6 +7,7 @@ from fastapi import (
     Query,
     status
 )
+
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -148,8 +149,8 @@ def get_incidents(
     db: Session = Depends(get_db)
 ):
     query = build_incident_query(
-    db=db,
-    current_user=current_user
+        db=db,
+        current_user=current_user
     )
 
     if status_filter:
@@ -245,6 +246,7 @@ def get_incident(
 
     return incident
 
+
 # -------------------------------------------------
 # ASSIGN INCIDENT
 # -------------------------------------------------
@@ -274,6 +276,13 @@ def assign_incident(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Incident not found."
+        )
+
+    # Closed incidents must not be reassigned.
+    if incident.status == "closed":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot assign a closed incident."
         )
 
     assignee = (
