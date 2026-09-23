@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import api from "../api/api"
 import "./SLAPolicies.css"
 
@@ -21,6 +22,7 @@ function SLAPolicies() {
       setPolicies(response.data)
     } catch (err) {
       console.error(err)
+
       setError(
         err.response?.data?.detail ||
           "Could not load SLA policies."
@@ -76,14 +78,22 @@ function SLAPolicies() {
           payload
         )
 
-        setMessage("SLA policy updated successfully.")
+        setMessage(
+          "SLA policy updated successfully."
+        )
       } else {
-        await api.post("/sla-policies", payload)
+        await api.post(
+          "/sla-policies",
+          payload
+        )
 
-        setMessage("SLA policy created successfully.")
+        setMessage(
+          "SLA policy created successfully."
+        )
       }
 
       resetForm()
+
       await fetchPolicies()
     } catch (err) {
       console.error(err)
@@ -101,8 +111,12 @@ function SLAPolicies() {
     setEditingPolicy(policy)
 
     setPriority(policy.priority)
-    setResponseMinutes(policy.response_minutes)
-    setResolutionMinutes(policy.resolution_minutes)
+    setResponseMinutes(
+      policy.response_minutes
+    )
+    setResolutionMinutes(
+      policy.resolution_minutes
+    )
 
     setMessage("")
     setError("")
@@ -119,7 +133,9 @@ function SLAPolicies() {
   }
 
   const formatPriority = (value) => {
-    if (!value) return ""
+    if (!value) {
+      return ""
+    }
 
     return (
       value.charAt(0).toUpperCase() +
@@ -130,9 +146,33 @@ function SLAPolicies() {
   return (
     <div className="sla-page">
 
+      {/* BACK TO DASHBOARD */}
+
+      <div
+        style={{
+          marginBottom: "20px",
+        }}
+      >
+        <Link
+          to="/dashboard"
+          style={{
+            color: "#2563eb",
+            textDecoration: "none",
+            fontWeight: "600",
+            fontSize: "14px",
+          }}
+        >
+          ← Back to Dashboard
+        </Link>
+      </div>
+
+
       <div className="sla-layout">
 
-        {/* CREATE / EDIT FORM */}
+        {/* =========================================
+            CREATE / EDIT FORM
+        ========================================== */}
+
         <section className="sla-form-card">
 
           <h1>
@@ -141,11 +181,17 @@ function SLAPolicies() {
               : "Create SLA Policy"}
           </h1>
 
+
           {editingPolicy && (
             <p className="editing-message">
-              Editing {formatPriority(editingPolicy.priority)} policy
+              Editing{" "}
+              {formatPriority(
+                editingPolicy.priority
+              )}{" "}
+              policy
             </p>
           )}
+
 
           {message && (
             <div className="sla-success-message">
@@ -153,32 +199,53 @@ function SLAPolicies() {
             </div>
           )}
 
+
           {error && (
             <div className="sla-error-message">
               {error}
             </div>
           )}
 
+
           <form onSubmit={handleSubmit}>
 
             <div className="sla-form-group">
 
-              <label>Priority</label>
+              <label>
+                Priority
+              </label>
 
               <select
                 value={priority}
                 onChange={(event) =>
-                  setPriority(event.target.value)
+                  setPriority(
+                    event.target.value
+                  )
                 }
-                disabled={Boolean(editingPolicy)}
+                disabled={Boolean(
+                  editingPolicy
+                )}
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
+                <option value="low">
+                  Low
+                </option>
+
+                <option value="medium">
+                  Medium
+                </option>
+
+                <option value="high">
+                  High
+                </option>
+
+                <option value="critical">
+                  Critical
+                </option>
+
               </select>
 
             </div>
+
 
             <div className="sla-form-group">
 
@@ -191,13 +258,16 @@ function SLAPolicies() {
                 min="1"
                 value={responseMinutes}
                 onChange={(event) =>
-                  setResponseMinutes(event.target.value)
+                  setResponseMinutes(
+                    event.target.value
+                  )
                 }
                 placeholder="Example: 30"
                 required
               />
 
             </div>
+
 
             <div className="sla-form-group">
 
@@ -210,13 +280,16 @@ function SLAPolicies() {
                 min="1"
                 value={resolutionMinutes}
                 onChange={(event) =>
-                  setResolutionMinutes(event.target.value)
+                  setResolutionMinutes(
+                    event.target.value
+                  )
                 }
                 placeholder="Example: 120"
                 required
               />
 
             </div>
+
 
             <button
               type="submit"
@@ -230,6 +303,7 @@ function SLAPolicies() {
                   : "Create Policy"}
             </button>
 
+
             {editingPolicy && (
               <button
                 type="button"
@@ -239,7 +313,8 @@ function SLAPolicies() {
                   marginTop: "10px",
                   padding: "14px",
                   borderRadius: "8px",
-                  border: "1px solid #cbd5e1",
+                  border:
+                    "1px solid #cbd5e1",
                   background: "white",
                   cursor: "pointer",
                   fontWeight: "600",
@@ -254,84 +329,131 @@ function SLAPolicies() {
         </section>
 
 
-        {/* CURRENT POLICIES */}
+        {/* =========================================
+            CURRENT POLICIES
+        ========================================== */}
+
         <section className="sla-policies-card">
 
-          <h1>Current Policies</h1>
+          <h1>
+            Current Policies
+          </h1>
+
 
           {policies.length === 0 ? (
-            <p>No SLA policies configured.</p>
+
+            <p>
+              No SLA policies configured.
+            </p>
+
           ) : (
+
             <div className="sla-policy-list">
 
-              {policies.map((policy) => (
-                <div
-                  className="sla-policy-item"
-                  key={policy.id}
-                >
+              {policies.map(
+                (policy) => (
 
-                  <div className="sla-policy-header">
+                  <div
+                    className="sla-policy-item"
+                    key={policy.id}
+                  >
 
-                    <h3>
-                      {formatPriority(policy.priority)}
-                    </h3>
+                    <div className="sla-policy-header">
 
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}
-                    >
+                      <h3>
+                        {formatPriority(
+                          policy.priority
+                        )}
+                      </h3>
 
-                      <span className="sla-active-badge">
-                        {policy.is_active
-                          ? "Active"
-                          : "Inactive"}
-                      </span>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleEdit(policy)
-                        }
+                      <div
                         style={{
-                          padding: "7px 14px",
-                          border: "1px solid #2563eb",
-                          borderRadius: "7px",
-                          background: "white",
-                          color: "#2563eb",
-                          cursor: "pointer",
-                          fontWeight: "600",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
                         }}
                       >
-                        Edit
-                      </button>
+
+                        <span className="sla-active-badge">
+                          {policy.is_active
+                            ? "Active"
+                            : "Inactive"}
+                        </span>
+
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleEdit(
+                              policy
+                            )
+                          }
+                          style={{
+                            padding:
+                              "7px 14px",
+                            border:
+                              "1px solid #2563eb",
+                            borderRadius:
+                              "7px",
+                            background:
+                              "white",
+                            color:
+                              "#2563eb",
+                            cursor:
+                              "pointer",
+                            fontWeight:
+                              "600",
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                      </div>
+
+                    </div>
+
+
+                    <div className="sla-policy-times">
+
+                      <div>
+
+                        <span>
+                          Response
+                        </span>
+
+                        <strong>
+                          {
+                            policy
+                              .response_minutes
+                          }{" "}
+                          min
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+                          Resolution
+                        </span>
+
+                        <strong>
+                          {
+                            policy
+                              .resolution_minutes
+                          }{" "}
+                          min
+                        </strong>
+
+                      </div>
 
                     </div>
 
                   </div>
-
-                  <div className="sla-policy-times">
-
-                    <div>
-                      <span>Response</span>
-                      <strong>
-                        {policy.response_minutes} min
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>Resolution</span>
-                      <strong>
-                        {policy.resolution_minutes} min
-                      </strong>
-                    </div>
-
-                  </div>
-
-                </div>
-              ))}
+                )
+              )}
 
             </div>
           )}
