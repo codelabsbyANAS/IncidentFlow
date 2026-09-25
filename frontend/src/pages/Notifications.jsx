@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+
 import api from "../api/api"
 import "./Notifications.css"
 
@@ -69,10 +70,46 @@ function Notifications() {
     (notification) => !notification.is_read
   ).length
 
+  const formatNotificationType = (value) => {
+    if (!value) return "Notification"
+
+    return value
+      .replaceAll("_", " ")
+      .replace(/\b\w/g, (letter) =>
+        letter.toUpperCase()
+      )
+  }
+
+  const getNotificationIcon = (type) => {
+    const normalized = type?.toLowerCase() || ""
+
+    if (normalized.includes("sla")) {
+      return "◷"
+    }
+
+    if (normalized.includes("assign")) {
+      return "↗"
+    }
+
+    if (
+      normalized.includes("resolve") ||
+      normalized.includes("close")
+    ) {
+      return "✓"
+    }
+
+    return "!"
+  }
+
   if (loading) {
     return (
-      <div className="notifications-message">
-        Loading notifications...
+      <div className="notifications-page">
+        <div className="notifications-shell">
+          <div className="notifications-loading-card">
+            <div className="notifications-loading-dot" />
+            <span>Loading notifications...</span>
+          </div>
+        </div>
       </div>
     )
   }
@@ -80,123 +117,243 @@ function Notifications() {
   return (
     <div className="notifications-page">
 
-      <button
-        className="notifications-back"
-        onClick={() => navigate("/dashboard")}
-      >
-        ← Dashboard
-      </button>
+      <div className="notifications-glow notifications-glow-one" />
+      <div className="notifications-glow notifications-glow-two" />
 
-      <div className="notifications-header">
+      <div className="notifications-shell">
 
-        <div>
-          <h1>Notifications</h1>
+        <button
+          className="notifications-back"
+          onClick={() => navigate("/dashboard")}
+        >
+          <span className="notifications-back-icon">
+            ←
+          </span>
+          Dashboard
+        </button>
 
-          <p>
-            Updates about your assigned incidents and SLA activity.
-          </p>
-        </div>
 
-        <div className="unread-counter">
-          {unreadCount} unread
-        </div>
+        {/* =============================================
+            HEADER
+        ============================================== */}
 
-      </div>
+        <section className="notifications-hero">
 
-      {error && (
-        <div className="notifications-error">
-          {error}
-        </div>
-      )}
+          <div className="notifications-hero-copy">
 
-      {notifications.length === 0 ? (
-        <div className="notifications-empty">
+            <div className="notifications-title-row">
 
-          <div className="notifications-empty-icon">
-            🔔
-          </div>
-
-          <h2>No notifications yet</h2>
-
-          <p>
-            Your notifications will appear here.
-          </p>
-
-        </div>
-      ) : (
-        <div className="notifications-list">
-
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`notification-card ${
-                notification.is_read
-                  ? "notification-read"
-                  : "notification-unread"
-              }`}
-            >
-
-              <div className="notification-content">
-
-                <div className="notification-title-row">
-
-                  <strong>
-                    {notification.notification_type
-                      .replaceAll("_", " ")}
-                  </strong>
-
-                  {!notification.is_read && (
-                    <span className="unread-dot" />
-                  )}
-
-                </div>
-
-                <p>{notification.message}</p>
-
-                <span className="notification-date">
-                  {new Date(
-                    notification.created_at
-                  ).toLocaleString()}
-                </span>
-
+              <div className="notifications-title-icon">
+                ◉
               </div>
 
-              <div className="notification-actions">
+              <div>
+                <p className="notifications-eyebrow">
+                  SERVICE UPDATES
+                </p>
 
-                {notification.incident_id && (
-                  <button
-                    className="view-incident-button"
-                    onClick={() =>
-                      navigate(
-                        `/incidents/${notification.incident_id}`
-                      )
-                    }
-                  >
-                    View Incident
-                  </button>
-                )}
+                <h1>
+                  Notifications
+                </h1>
 
-                {!notification.is_read && (
-                  <button
-                    className="mark-read-button"
-                    onClick={() =>
-                      markAsRead(notification.id)
-                    }
-                    disabled={markingId === notification.id}
-                  >
-                    {markingId === notification.id
-                      ? "Updating..."
-                      : "Mark as read"}
-                  </button>
-                )}
-
+                <p>
+                  Stay on top of incident assignments,
+                  SLA activity and service operations updates.
+                </p>
               </div>
 
             </div>
-          ))}
 
-        </div>
-      )}
+          </div>
+
+
+          <div className="notifications-hero-stats">
+
+            <div className="notifications-stat">
+              <span>Unread</span>
+              <strong>{unreadCount}</strong>
+            </div>
+
+            <div className="notifications-stat">
+              <span>Total</span>
+              <strong>{notifications.length}</strong>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {error && (
+          <div className="notifications-error">
+            <span className="notifications-error-icon">
+              !
+            </span>
+            {error}
+          </div>
+        )}
+
+
+        {/* =============================================
+            NOTIFICATION FEED
+        ============================================== */}
+
+        {notifications.length === 0 ? (
+          <section className="notifications-empty">
+
+            <div className="notifications-empty-icon">
+              ◉
+            </div>
+
+            <span className="notifications-empty-kicker">
+              ALL CAUGHT UP
+            </span>
+
+            <h2>
+              No notifications yet
+            </h2>
+
+            <p>
+              Assignment updates, SLA alerts and other
+              operational activity will appear here.
+            </p>
+
+          </section>
+        ) : (
+          <section className="notifications-feed">
+
+            <div className="notifications-feed-header">
+
+              <div>
+                <p className="notifications-feed-kicker">
+                  ACTIVITY FEED
+                </p>
+
+                <h2>
+                  Recent notifications
+                </h2>
+              </div>
+
+              <span className="unread-counter">
+                {unreadCount} unread
+              </span>
+
+            </div>
+
+
+            <div className="notifications-list">
+
+              {notifications.map((notification) => (
+                <article
+                  key={notification.id}
+                  className={`notification-card ${
+                    notification.is_read
+                      ? "notification-read"
+                      : "notification-unread"
+                  }`}
+                >
+
+                  <div className="notification-leading">
+
+                    <div
+                      className={`notification-type-icon ${
+                        notification.is_read
+                          ? "read"
+                          : "unread"
+                      }`}
+                    >
+                      {getNotificationIcon(
+                        notification.notification_type
+                      )}
+                    </div>
+
+
+                    <div className="notification-content">
+
+                      <div className="notification-title-row">
+
+                        <strong>
+                          {formatNotificationType(
+                            notification.notification_type
+                          )}
+                        </strong>
+
+                        {!notification.is_read && (
+                          <span className="notification-new-pill">
+                            New
+                          </span>
+                        )}
+
+                      </div>
+
+                      <p>
+                        {notification.message}
+                      </p>
+
+                      <div className="notification-meta">
+
+                        <span>
+                          {new Date(
+                            notification.created_at
+                          ).toLocaleString()}
+                        </span>
+
+                        <span className="notification-status-text">
+                          {notification.is_read
+                            ? "Read"
+                            : "Unread"}
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+
+                  <div className="notification-actions">
+
+                    {notification.incident_id && (
+                      <button
+                        className="view-incident-button"
+                        onClick={() =>
+                          navigate(
+                            `/incidents/${notification.incident_id}`
+                          )
+                        }
+                      >
+                        View Incident
+                        <span>→</span>
+                      </button>
+                    )}
+
+                    {!notification.is_read && (
+                      <button
+                        className="mark-read-button"
+                        onClick={() =>
+                          markAsRead(notification.id)
+                        }
+                        disabled={
+                          markingId === notification.id
+                        }
+                      >
+                        {markingId === notification.id
+                          ? "Updating..."
+                          : "Mark as read"}
+                      </button>
+                    )}
+
+                  </div>
+
+                </article>
+              ))}
+
+            </div>
+
+          </section>
+        )}
+
+      </div>
 
     </div>
   )

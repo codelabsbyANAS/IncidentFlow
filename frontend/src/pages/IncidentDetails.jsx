@@ -34,7 +34,6 @@ function IncidentDetails() {
       )
 
       setIncident(response.data)
-
       return response.data
     } catch (err) {
       console.error(err)
@@ -64,7 +63,6 @@ function IncidentDetails() {
   const fetchCurrentUser = async () => {
     try {
       const response = await api.get("/auth/me")
-
       setCurrentUser(response.data)
     } catch (err) {
       console.error(err)
@@ -133,7 +131,6 @@ function IncidentDetails() {
 
       setIncident(response.data)
       setSelectedUser("")
-
       triggerRefresh()
     } catch (err) {
       console.error(err)
@@ -160,7 +157,6 @@ function IncidentDetails() {
       )
 
       setIncident(response.data)
-
       triggerRefresh()
     } catch (err) {
       console.error(err)
@@ -180,7 +176,6 @@ function IncidentDetails() {
 
   const formatDate = (date) => {
     if (!date) return "—"
-
     return new Date(date).toLocaleString()
   }
 
@@ -197,7 +192,12 @@ function IncidentDetails() {
   if (loading) {
     return (
       <div className="incident-details-page">
-        <p>Loading incident...</p>
+        <div className="incident-details-shell">
+          <div className="incident-loading-card">
+            <div className="incident-loading-dot" />
+            <span>Loading incident...</span>
+          </div>
+        </div>
       </div>
     )
   }
@@ -205,16 +205,26 @@ function IncidentDetails() {
   if (error && !incident) {
     return (
       <div className="incident-details-page">
+        <div className="incident-details-shell">
 
-        <button
-          className="back-button"
-          onClick={() => navigate("/incidents")}
-        >
-          ← Back to Incidents
-        </button>
+          <button
+            className="incident-details-back-button"
+            onClick={() => navigate("/incidents")}
+          >
+            <span className="incident-details-back-icon">
+              ←
+            </span>
+            Back to Incidents
+          </button>
 
-        <p>{error}</p>
+          <div className="incident-error">
+            <span className="incident-error-icon">
+              !
+            </span>
+            {error}
+          </div>
 
+        </div>
       </div>
     )
   }
@@ -226,208 +236,365 @@ function IncidentDetails() {
   return (
     <div className="incident-details-page">
 
-      <button
-        className="back-button"
-        onClick={() => navigate("/incidents")}
-      >
-        ← Back to Incidents
-      </button>
+      <div className="incident-details-glow incident-details-glow-one" />
+      <div className="incident-details-glow incident-details-glow-two" />
 
-      <div className="incident-details-header">
+      <div className="incident-details-shell">
 
-        <div>
-          <span className="ticket-number">
-            {incident.ticket_number}
+        <button
+          className="incident-details-back-button"
+          onClick={() => navigate("/incidents")}
+        >
+          <span className="incident-details-back-icon">
+            ←
           </span>
+          Back to Incidents
+        </button>
 
-          <h1>{incident.title}</h1>
-        </div>
+        <section className="incident-details-hero">
 
-      </div>
+          <div className="incident-hero-copy">
 
-      {error && (
-        <div className="incident-error">
-          {error}
-        </div>
-      )}
+            <div className="incident-hero-meta">
 
-      <div className="incident-details-grid">
+              <span className="incident-ticket-pill">
+                {incident.ticket_number}
+              </span>
 
-        <section className="incident-main-card">
+              <span
+                className={`incident-priority-pill ${incident.priority}`}
+              >
+                {formatStatus(incident.priority)}
+              </span>
 
-          <h2>Description</h2>
+              <span
+                className={`incident-status-pill ${incident.status}`}
+              >
+                {formatStatus(incident.status)}
+              </span>
 
-          <p>
-            {incident.description ||
-              "No description provided."}
-          </p>
+            </div>
+
+            <p className="incident-hero-eyebrow">
+              INCIDENT WORKSPACE
+            </p>
+
+            <h1>
+              {incident.title}
+            </h1>
+
+            <p className="incident-hero-subtitle">
+              Review incident details, assignment, SLA health,
+              comments and operational history.
+            </p>
+
+          </div>
+
+          <div className="incident-hero-summary">
+
+            <div className="incident-hero-summary-item">
+              <span>Assigned to</span>
+              <strong>
+                {getUserName(incident.assigned_to)}
+              </strong>
+            </div>
+
+            <div className="incident-hero-summary-item">
+              <span>Created</span>
+              <strong>
+                {formatDate(incident.created_at)}
+              </strong>
+            </div>
+
+          </div>
 
         </section>
 
+        {error && (
+          <div className="incident-error">
+            <span className="incident-error-icon">
+              !
+            </span>
+            {error}
+          </div>
+        )}
 
-        <aside className="incident-side-card">
+        <div className="incident-details-grid">
 
-          <h2>Incident information</h2>
+          <section className="incident-main-card">
 
-          {canAssign &&
-            incident.status !== "closed" && (
-              <div className="assignment-section">
+            <div className="incident-card-heading">
 
-                <label>
-                  Assign incident
-                </label>
+              <div className="incident-card-heading-icon">
+                ≡
+              </div>
 
-                <div className="assignment-controls">
+              <div>
+                <span className="incident-card-kicker">
+                  INCIDENT DETAILS
+                </span>
 
-                  <select
-                    value={selectedUser}
-                    onChange={(event) =>
-                      setSelectedUser(
-                        event.target.value
-                      )
-                    }
-                    disabled={actionLoading}
-                  >
+                <h2>
+                  Description
+                </h2>
+              </div>
 
-                    <option value="">
-                      Select team member
-                    </option>
+            </div>
 
-                    {assignableUsers.map((user) => (
-                      <option
-                        key={user.id}
-                        value={user.id}
-                      >
-                        {user.name} ({user.role})
+            <div className="incident-description-box">
+              <p>
+                {incident.description ||
+                  "No description provided."}
+              </p>
+            </div>
+
+            <div className="incident-detail-highlights">
+
+              <div className="incident-highlight">
+                <span>Category</span>
+                <strong>
+                  {incident.category || "—"}
+                </strong>
+              </div>
+
+              <div className="incident-highlight">
+                <span>Priority</span>
+                <strong>
+                  {formatStatus(incident.priority)}
+                </strong>
+              </div>
+
+              <div className="incident-highlight">
+                <span>Status</span>
+                <strong>
+                  {formatStatus(incident.status)}
+                </strong>
+              </div>
+
+            </div>
+
+          </section>
+
+          <aside className="incident-side-card">
+
+            <div className="incident-card-heading">
+
+              <div className="incident-card-heading-icon side">
+                ↗
+              </div>
+
+              <div>
+                <span className="incident-card-kicker">
+                  WORKFLOW
+                </span>
+
+                <h2>
+                  Incident controls
+                </h2>
+              </div>
+
+            </div>
+
+            {canAssign &&
+              incident.status !== "closed" && (
+                <div className="assignment-section">
+
+                  <label>
+                    Assign incident
+                  </label>
+
+                  <p>
+                    Route this incident to an available
+                    agent or manager.
+                  </p>
+
+                  <div className="assignment-controls">
+
+                    <select
+                      value={selectedUser}
+                      onChange={(event) =>
+                        setSelectedUser(
+                          event.target.value
+                        )
+                      }
+                      disabled={actionLoading}
+                    >
+
+                      <option value="">
+                        Select team member
                       </option>
-                    ))}
 
-                  </select>
+                      {assignableUsers.map((user) => (
+                        <option
+                          key={user.id}
+                          value={user.id}
+                        >
+                          {user.name} ({user.role})
+                        </option>
+                      ))}
 
-                  <button
-                    type="button"
-                    onClick={handleAssign}
-                    disabled={
-                      !selectedUser ||
-                      actionLoading
-                    }
-                  >
-                    Assign
-                  </button>
+                    </select>
 
+                    <button
+                      type="button"
+                      onClick={handleAssign}
+                      disabled={
+                        !selectedUser ||
+                        actionLoading
+                      }
+                    >
+                      Assign
+                    </button>
+
+                  </div>
+
+                </div>
+              )}
+
+            {canChangeStatus &&
+              incident.status === "assigned" && (
+                <button
+                  className="status-action-button"
+                  onClick={() =>
+                    updateStatus("in_progress")
+                  }
+                  disabled={actionLoading}
+                >
+                  <span className="status-action-icon">
+                    →
+                  </span>
+
+                  {actionLoading
+                    ? "Updating..."
+                    : "Start Progress"}
+                </button>
+              )}
+
+            {canChangeStatus &&
+              incident.status === "in_progress" && (
+                <button
+                  className="status-action-button resolved-action"
+                  onClick={() =>
+                    updateStatus("resolved")
+                  }
+                  disabled={actionLoading}
+                >
+                  <span className="status-action-icon">
+                    ✓
+                  </span>
+
+                  {actionLoading
+                    ? "Updating..."
+                    : "Resolve Incident"}
+                </button>
+              )}
+
+            {canChangeStatus &&
+              incident.status === "resolved" && (
+                <button
+                  className="status-action-button close-action"
+                  onClick={() =>
+                    updateStatus("closed")
+                  }
+                  disabled={actionLoading}
+                >
+                  <span className="status-action-icon">
+                    ✓
+                  </span>
+
+                  {actionLoading
+                    ? "Updating..."
+                    : "Close Incident"}
+                </button>
+              )}
+
+            {incident.status === "closed" && (
+              <div className="closed-incident-notice">
+
+                <span className="closed-incident-icon">
+                  ✓
+                </span>
+
+                <div>
+                  <strong>
+                    Incident closed
+                  </strong>
+
+                  <p>
+                    This incident remains available as
+                    an operational record.
+                  </p>
                 </div>
 
               </div>
             )}
 
+            <div className="incident-info-list">
 
-          {canChangeStatus &&
-            incident.status === "assigned" && (
-              <button
-                className="status-action-button"
-                onClick={() =>
-                  updateStatus("in_progress")
-                }
-                disabled={actionLoading}
-              >
-                {actionLoading
-                  ? "Updating..."
-                  : "Start Progress"}
-              </button>
-            )}
+              <div className="incident-info-item">
+                <span>Category</span>
+                <strong>
+                  {incident.category || "—"}
+                </strong>
+              </div>
 
+              <div className="incident-info-item">
+                <span>Priority</span>
+                <strong>
+                  {formatStatus(incident.priority)}
+                </strong>
+              </div>
 
-          {canChangeStatus &&
-            incident.status === "in_progress" && (
-              <button
-                className="status-action-button"
-                onClick={() =>
-                  updateStatus("resolved")
-                }
-                disabled={actionLoading}
-              >
-                {actionLoading
-                  ? "Updating..."
-                  : "Resolve Incident"}
-              </button>
-            )}
+              <div className="incident-info-item">
+                <span>Status</span>
+                <strong>
+                  {formatStatus(incident.status)}
+                </strong>
+              </div>
 
+              <div className="incident-info-item">
+                <span>Assigned to</span>
+                <strong>
+                  {getUserName(incident.assigned_to)}
+                </strong>
+              </div>
 
-          {canChangeStatus &&
-            incident.status === "resolved" && (
-              <button
-                className="status-action-button"
-                onClick={() =>
-                  updateStatus("closed")
-                }
-                disabled={actionLoading}
-              >
-                {actionLoading
-                  ? "Updating..."
-                  : "Close Incident"}
-              </button>
-            )}
+              <div className="incident-info-item">
+                <span>Created</span>
+                <strong>
+                  {formatDate(incident.created_at)}
+                </strong>
+              </div>
 
+            </div>
 
-          <div className="incident-info-item">
-            <span>Category</span>
-            <strong>
-              {incident.category || "—"}
-            </strong>
-          </div>
+          </aside>
 
-          <div className="incident-info-item">
-            <span>Priority</span>
-            <strong>
-              {formatStatus(incident.priority)}
-            </strong>
-          </div>
+        </div>
 
-          <div className="incident-info-item">
-            <span>Status</span>
-            <strong>
-              {formatStatus(incident.status)}
-            </strong>
-          </div>
+        <div className="incident-details-module-stack">
 
-          <div className="incident-info-item">
-            <span>Assigned to</span>
-            <strong>
-              {getUserName(incident.assigned_to)}
-            </strong>
-          </div>
+          <IncidentComments
+            incidentId={incidentId}
+            users={users}
+            currentUserRole={currentUser?.role}
+            onCommentAdded={handleCommentAdded}
+          />
 
-          <div className="incident-info-item">
-            <span>Created</span>
-            <strong>
-              {formatDate(incident.created_at)}
-            </strong>
-          </div>
+          <IncidentSLA
+            incidentId={incidentId}
+            refreshKey={refreshKey}
+          />
 
-        </aside>
+          <IncidentHistory
+            incidentId={incidentId}
+            users={users}
+            refreshKey={refreshKey}
+          />
+
+        </div>
 
       </div>
-
-
-      <IncidentComments
-        incidentId={incidentId}
-        users={users}
-        currentUserRole={currentUser?.role}
-        onCommentAdded={handleCommentAdded}
-      />
-
-
-      <IncidentSLA
-        incidentId={incidentId}
-        refreshKey={refreshKey}
-      />
-
-
-      <IncidentHistory
-        incidentId={incidentId}
-        users={users}
-        refreshKey={refreshKey}
-      />
 
     </div>
   )

@@ -1,10 +1,17 @@
 from datetime import datetime, timezone
-from sqlalchemy.orm import Session
-from app.models.user import User
-from app.notifications import create_notification
 
+from sqlalchemy.orm import Session
+
+from app.models.user import User
 from app.models.incident import Incident
 from app.models.sla_escalation import SLAEscalation
+
+from app.notifications import create_notification
+
+
+# -------------------------------------------------
+# NOTIFY ADMIN / MANAGER ABOUT SLA BREACH
+# -------------------------------------------------
 
 def notify_sla_breach(
     db: Session,
@@ -34,6 +41,11 @@ def notify_sla_breach(
             )
         )
 
+
+# -------------------------------------------------
+# CLOSE ACTIVE ESCALATIONS
+# -------------------------------------------------
+
 def close_incident_escalations(
     db: Session,
     incident: Incident
@@ -43,8 +55,10 @@ def close_incident_escalations(
     active_escalations = (
         db.query(SLAEscalation)
         .filter(
-            SLAEscalation.organization_id == incident.organization_id,
-            SLAEscalation.incident_id == incident.id,
+            SLAEscalation.organization_id
+            == incident.organization_id,
+            SLAEscalation.incident_id
+            == incident.id,
             SLAEscalation.is_active == True
         )
         .all()
@@ -56,16 +70,23 @@ def close_incident_escalations(
 
     return len(active_escalations)
 
+
+# -------------------------------------------------
+# EVALUATE SLA ESCALATIONS
+# -------------------------------------------------
+
 def evaluate_sla_escalations(
     db: Session,
     incident: Incident
 ):
     now = datetime.now(timezone.utc)
+
     created_escalations = []
 
-    # -------------------------
-    # Response SLA breach
-    # -------------------------
+    # -------------------------------------------------
+    # RESPONSE SLA
+    # -------------------------------------------------
+
     response_breached = False
 
     if incident.response_due_at:
@@ -80,17 +101,22 @@ def evaluate_sla_escalations(
             )
 
     if response_breached:
-        existing = (
+        existing_response_escalation = (
             db.query(SLAEscalation)
             .filter(
-                SLAEscalation.incident_id == incident.id,
-                SLAEscalation.breach_type == "response",
-                SLAEscalation.escalation_level == 1
+                SLAEscalation.organization_id
+                == incident.organization_id,
+                SLAEscalation.incident_id
+                == incident.id,
+                SLAEscalation.breach_type
+                == "response",
+                SLAEscalation.escalation_level
+                == 1
             )
             .first()
         )
 
-        if not existing:
+        if not existing_response_escalation:
             escalation = SLAEscalation(
                 organization_id=incident.organization_id,
                 incident_id=incident.id,
@@ -107,11 +133,14 @@ def evaluate_sla_escalations(
                 breach_type="response"
             )
 
-            created_escalations.append(escalation)
+            created_escalations.append(
+                escalation
+            )
 
-    # -------------------------
-    # Resolution SLA breach
-    # -------------------------
+    # -------------------------------------------------
+    # RESOLUTION SLA
+    # -------------------------------------------------
+
     resolution_breached = False
 
     if incident.resolution_due_at:
@@ -126,17 +155,22 @@ def evaluate_sla_escalations(
             )
 
     if resolution_breached:
-        existing = (
+        existing_resolution_escalation = (
             db.query(SLAEscalation)
             .filter(
-                SLAEscalation.incident_id == incident.id,
-                SLAEscalation.breach_type == "resolution",
-                SLAEscalation.escalation_level == 2
+                SLAEscalation.organization_id
+                == incident.organization_id,
+                SLAEscalation.incident_id
+                == incident.id,
+                SLAEscalation.breach_type
+                == "resolution",
+                SLAEscalation.escalation_level
+                == 2
             )
             .first()
         )
 
-        if not existing:
+        if not existing_resolution_escalation:
             escalation = SLAEscalation(
                 organization_id=incident.organization_id,
                 incident_id=incident.id,
@@ -153,17 +187,8 @@ def evaluate_sla_escalations(
                 breach_type="resolution"
             )
 
-            created_escalations.append(escalation)
-
-    
-
-        # Close active escalations when incident is finished
-        if incident.status in {"resolved", "closed"}:
-            db.flush()
-
-            close_incident_escalations(
-               db=db,
-               incident=incident
-        )
+            created_escalations.append(
+                escalation
+            )
 
     return created_escalations

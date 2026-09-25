@@ -15,12 +15,10 @@ function Login() {
     const status = err.response?.status
     const detail = err.response?.data?.detail
 
-    // Wrong email/password
     if (status === 401) {
       return "Invalid email or password."
     }
 
-    // FastAPI validation error
     if (status === 422) {
       if (Array.isArray(detail)) {
         const messages = detail
@@ -39,12 +37,10 @@ function Login() {
       return "Please check the information you entered."
     }
 
-    // Other API error
     if (typeof detail === "string") {
       return detail
     }
 
-    // Backend not running / network problem
     if (!err.response) {
       return "Could not connect to the server. Please make sure the backend is running."
     }
@@ -82,110 +78,238 @@ function Login() {
   return (
     <div className="login-page">
 
-      <div className="login-card">
+      <div className="login-shell">
 
-        <div className="login-brand">
+        {/* =============================================
+            LOGIN FORM
+        ============================================== */}
 
-          <div className="brand-icon">
-            IF
+        <section className="login-panel">
+
+          <div className="login-brand">
+
+            <div className="brand-icon">
+              RO
+            </div>
+
+            <div>
+              <h1>ResolveOps</h1>
+
+              <p>
+                Service Operations
+              </p>
+            </div>
+
           </div>
 
-          <div>
-            <h1>IncidentFlow</h1>
 
-            <p>
-              Incident & SLA Management
-            </p>
+          <div className="login-content">
+
+            <div className="login-heading">
+
+              <span className="login-eyebrow">
+                INCIDENT & SLA MANAGEMENT
+              </span>
+
+              <h2>
+                Welcome back
+              </h2>
+
+              <p>
+                Sign in to manage incidents,
+                monitor SLA performance and keep
+                service operations moving.
+              </p>
+
+            </div>
+
+
+            <form
+              className="login-form"
+              onSubmit={handleSubmit}
+            >
+
+              <div className="form-group">
+
+                <label htmlFor="login-email">
+                  Email address
+                </label>
+
+                <input
+                  id="login-email"
+                  type="email"
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
+                  required
+                  autoComplete="email"
+                />
+
+              </div>
+
+
+              <div className="form-group">
+
+                <label htmlFor="login-password">
+                  Password
+                </label>
+
+                <input
+                  id="login-password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
+                  required
+                  minLength={8}
+                  autoComplete="current-password"
+                />
+
+              </div>
+
+
+              {error && (
+                <p className="login-error">
+                  {error}
+                </p>
+              )}
+
+
+              <button
+                className="login-button"
+                type="submit"
+                disabled={loading}
+              >
+                {loading
+                  ? "Signing in..."
+                  : "Sign in to ResolveOps"}
+              </button>
+
+            </form>
+
+
+            <div className="signup-text">
+
+              <span>
+                New organization?
+              </span>
+
+              <Link to="/signup">
+                Create an account
+              </Link>
+
+            </div>
+
           </div>
 
-        </div>
 
-
-        <div className="login-heading">
-
-          <h2>
-            Welcome back
-          </h2>
-
-          <p>
-            Sign in to manage incidents and service operations.
+          <p className="login-footer-text">
+            Multi-tenant incident and service
+            operations platform
           </p>
 
-        </div>
+        </section>
 
 
-        <form onSubmit={handleSubmit}>
+        {/* =============================================
+            VISUAL PANEL
+        ============================================== */}
 
-          <div className="form-group">
+        <section className="login-visual-panel">
 
-            <label>
-              Email address
-            </label>
-
-            <input
-              type="email"
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              required
-              autoComplete="email"
-            />
-
-          </div>
+          <div className="visual-glow visual-glow-one" />
+          <div className="visual-glow visual-glow-two" />
 
 
-          <div className="form-group">
+          <div className="visual-copy">
 
-            <label>
-              Password
-            </label>
+            <span className="visual-badge">
+              SERVICE OPERATIONS
+            </span>
 
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              required
-              minLength={8}
-              autoComplete="current-password"
-            />
+            <h2>
+              Keep every incident
+              moving toward resolution.
+            </h2>
 
-          </div>
-
-
-          {error && (
-            <p className="login-error">
-              {error}
+            <p>
+              Route incidents, monitor SLA health,
+              coordinate teams and stay ahead of
+              operational risk.
             </p>
-          )}
+
+          </div>
 
 
-          <button
-            className="login-button"
-            type="submit"
-            disabled={loading}
-          >
-            {loading
-              ? "Signing in..."
-              : "Sign in"}
-          </button>
+          <div className="login-illustration">
 
-        </form>
+            <img
+              src="/resolveops-login.png"
+              alt="ResolveOps incident routing and SLA workflow"
+            />
+
+          </div>
 
 
-        <div className="signup-text">
+          <div className="visual-features">
 
-          New organization?{" "}
+            <div className="visual-feature">
+              <span className="feature-icon">
+                ↗
+              </span>
 
-          <Link to="/signup">
-            Create an account
-          </Link>
+              <div>
+                <strong>
+                  Smart Routing
+                </strong>
 
-        </div>
+                <span>
+                  Automated assignment
+                </span>
+              </div>
+            </div>
+
+
+            <div className="visual-feature">
+              <span className="feature-icon">
+                ◷
+              </span>
+
+              <div>
+                <strong>
+                  SLA Tracking
+                </strong>
+
+                <span>
+                  Real-time visibility
+                </span>
+              </div>
+            </div>
+
+
+            <div className="visual-feature">
+              <span className="feature-icon">
+                ✓
+              </span>
+
+              <div>
+                <strong>
+                  Resolution
+                </strong>
+
+                <span>
+                  Clear operations flow
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
 
       </div>
 

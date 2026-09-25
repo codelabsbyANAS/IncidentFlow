@@ -1,12 +1,22 @@
 from app.celery_app import celery_app
 from app.database import SessionLocal
+
+# Import models so SQLAlchemy has the complete metadata
+# when Celery runs independently from FastAPI.
+from app.models.organization import Organization
+from app.models.user import User
+from app.models.sla_policy import SLAPolicy
 from app.models.incident import Incident
+from app.models.notification import Notification
+from app.models.sla_escalation import SLAEscalation
+
 from app.sla import evaluate_sla_escalations
 
 
 @celery_app.task(name="incidentflow.health_check")
 def celery_health_check():
     return "Celery is working"
+
 
 @celery_app.task(name="incidentflow.check_sla_breaches")
 def check_sla_breaches():

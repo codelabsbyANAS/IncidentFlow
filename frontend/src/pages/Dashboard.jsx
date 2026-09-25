@@ -11,6 +11,15 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
+  const [reportPeriod, setReportPeriod] =
+    useState("weekly")
+
+  const [reportDownloading, setReportDownloading] =
+    useState(false)
+
+  const [reportError, setReportError] =
+    useState("")
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -85,10 +94,103 @@ function Dashboard() {
   }
 
   // ---------------------------------------------
+  // DOWNLOAD EXCEL REPORT
+  // ---------------------------------------------
+
+  const handleDownloadReport = async () => {
+    setReportDownloading(true)
+    setReportError("")
+
+    try {
+      const response = await api.get(
+        "/reports/operations.xlsx",
+        {
+          params: {
+            period: reportPeriod,
+          },
+          responseType: "blob",
+        }
+      )
+
+      const contentDisposition =
+        response.headers["content-disposition"]
+
+      let filename =
+        `resolveops_${reportPeriod}_report.xlsx`
+
+      if (contentDisposition) {
+        const filenameMatch =
+          contentDisposition.match(
+            /filename="?([^"]+)"?/
+          )
+
+        if (
+          filenameMatch &&
+          filenameMatch[1]
+        ) {
+          filename = filenameMatch[1]
+        }
+      }
+
+      const blob = new Blob(
+        [response.data],
+        {
+          type:
+            response.headers["content-type"] ||
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }
+      )
+
+      const downloadUrl =
+        window.URL.createObjectURL(blob)
+
+      const link =
+        document.createElement("a")
+
+      link.href = downloadUrl
+      link.download = filename
+
+      document.body.appendChild(link)
+
+      link.click()
+
+      link.remove()
+
+      window.URL.revokeObjectURL(
+        downloadUrl
+      )
+    } catch (err) {
+      console.error(err)
+
+      if (err.response?.status === 401) {
+        localStorage.removeItem("access_token")
+        navigate("/login")
+        return
+      }
+
+      if (err.response?.status === 403) {
+        setReportError(
+          "You do not have permission to download management reports."
+        )
+      } else {
+        setReportError(
+          "Could not download the Excel report."
+        )
+      }
+    } finally {
+      setReportDownloading(false)
+    }
+  }
+
+  // ---------------------------------------------
   // ROLE PERMISSIONS
   // ---------------------------------------------
 
   const canViewSLAPolicies =
+    user?.role === "admin" ||
+    user?.role === "manager"
+
+  const canViewAutomationRules =
     user?.role === "admin" ||
     user?.role === "manager"
 
@@ -219,11 +321,11 @@ function Dashboard() {
         <div className="sidebar-brand">
 
           <div className="sidebar-logo">
-            IF
+            RO
           </div>
 
           <div>
-            <h2>IncidentFlow</h2>
+            <h2>ResolveOps</h2>
 
             <span>
               Service Operations
@@ -285,6 +387,20 @@ function Dashboard() {
           )}
 
 
+          {canViewAutomationRules && (
+            <NavLink
+              to="/automation-rules"
+              className={({ isActive }) =>
+                `nav-item ${
+                  isActive ? "active" : ""
+                }`
+              }
+            >
+              Automation Rules
+            </NavLink>
+          )}
+
+
           {canViewTeam && (
             <NavLink
               to="/team"
@@ -300,17 +416,6 @@ function Dashboard() {
 
         </nav>
 
-
-        <div className="sidebar-bottom">
-
-          <button
-            className="logout-button"
-            onClick={handleLogout}
-          >
-            Sign out
-          </button>
-
-        </div>
 
       </aside>
 
@@ -341,25 +446,37 @@ function Dashboard() {
           </div>
 
 
-          <div className="user-profile">
+          <div className="header-user-actions">
 
-            <div className="user-avatar">
-              {user?.name
-                ?.charAt(0)
-                ?.toUpperCase()}
+            <div className="user-profile">
+
+              <div className="user-avatar">
+                {user?.name
+                  ?.charAt(0)
+                  ?.toUpperCase()}
+              </div>
+
+              <div>
+
+                <strong>
+                  {user?.name}
+                </strong>
+
+                <span>
+                  {formatLabel(user?.role)}
+                </span>
+
+              </div>
+
             </div>
 
-            <div>
-
-              <strong>
-                {user?.name}
-              </strong>
-
-              <span>
-                {formatLabel(user?.role)}
-              </span>
-
-            </div>
+            <button
+              type="button"
+              className="header-logout-button"
+              onClick={handleLogout}
+            >
+              Sign out
+            </button>
 
           </div>
 
@@ -370,37 +487,51 @@ function Dashboard() {
             WELCOME CARD
         ---------------------------------------------- */}
 
-        <section className="welcome-card">
+        <section className="welcome-card welcome-card-premium">
 
-          <div>
+          <div className="welcome-content">
 
-            <p className="welcome-label">
-              WELCOME BACK
-            </p>
+            <div className="welcome-kicker-row">
+              <p className="welcome-label">
+                WELCOME BACK
+              </p>
 
-            <h2>
-              {user?.name}
+              <span className="welcome-product-badge">
+                Service Operations
+              </span>
+            </div>
+
+            <h2 className="welcome-title">
+              Keep operations moving, {user?.name}.
             </h2>
 
-            <p>
-              Here is an overview of your
-              IncidentFlow workspace.
+            <p className="welcome-description">
+              Track incidents, SLA health and team workload
+              from one ResolveOps workspace.
             </p>
+
+            <div className="account-details account-details-inline">
+
+              <span>
+                {user?.email}
+              </span>
+
+              <span>
+                Organization #
+                {user?.organization_id}
+              </span>
+
+            </div>
 
           </div>
 
-
-          <div className="account-details">
-
-            <span>
-              {user?.email}
-            </span>
-
-            <span>
-              Organization #
-              {user?.organization_id}
-            </span>
-
+          <div className="welcome-visual" aria-hidden="true">
+            <div className="welcome-visual-glow" />
+            <img
+              src="/resolveops-operations.png"
+              alt=""
+              className="welcome-illustration"
+            />
           </div>
 
         </section>
@@ -413,45 +544,63 @@ function Dashboard() {
         {canViewStatistics ? (
           <section className="stats-grid">
 
-            <div className="stat-card">
+            <div className="stat-card stat-card-total">
 
-              <span>
-                Total Incidents
-              </span>
+              <div className="stat-card-top">
+                <span className="stat-icon stat-icon-blue">
+                  ◈
+                </span>
+
+                <span className="stat-card-label">
+                  Total Incidents
+                </span>
+              </div>
 
               <strong>
                 {summary?.total_incidents ?? 0}
               </strong>
 
               <p>
-                All incidents
+                All incidents in your workspace
               </p>
 
             </div>
 
 
-            <div className="stat-card">
+            <div className="stat-card stat-card-open">
 
-              <span>
-                Open Incidents
-              </span>
+              <div className="stat-card-top">
+                <span className="stat-icon stat-icon-violet">
+                  !
+                </span>
+
+                <span className="stat-card-label">
+                  Open Incidents
+                </span>
+              </div>
 
               <strong>
                 {summary?.open_incidents ?? 0}
               </strong>
 
               <p>
-                Needs attention
+                Waiting for attention
               </p>
 
             </div>
 
 
-            <div className="stat-card">
+            <div className="stat-card stat-card-progress">
 
-              <span>
-                In Progress
-              </span>
+              <div className="stat-card-top">
+                <span className="stat-icon stat-icon-cyan">
+                  ↗
+                </span>
+
+                <span className="stat-card-label">
+                  In Progress
+                </span>
+              </div>
 
               <strong>
                 {
@@ -467,11 +616,17 @@ function Dashboard() {
             </div>
 
 
-            <div className="stat-card">
+            <div className="stat-card stat-card-sla">
 
-              <span>
-                SLA Escalations
-              </span>
+              <div className="stat-card-top">
+                <span className="stat-icon stat-icon-amber">
+                  ◷
+                </span>
+
+                <span className="stat-card-label">
+                  SLA Escalations
+                </span>
+              </div>
 
               <strong>
                 {
@@ -544,17 +699,133 @@ function Dashboard() {
             </section>
 
 
+            {/* =========================================
+                OPERATIONS REPORTS
+            ========================================== */}
+
+            <section className="analytics-panel report-panel">
+
+              <div className="analytics-panel-header report-panel-header">
+
+                <div className="panel-heading-with-icon">
+
+                  <div className="panel-icon panel-icon-blue">
+                    ⇩
+                  </div>
+
+                  <div>
+
+                    <h3>
+                      Operations Reports
+                    </h3>
+
+                    <p>
+                      Export incident-level service operations
+                      records for weekly, monthly or all-time review.
+                    </p>
+
+                  </div>
+
+                </div>
+
+                <span className="panel-badge">
+                  Excel export
+                </span>
+
+              </div>
+
+
+              <div className="report-controls">
+
+                <div className="report-field">
+
+                  <label htmlFor="report-period">
+                    Report period
+                  </label>
+
+                  <select
+                    id="report-period"
+                    className="report-select"
+                    value={reportPeriod}
+                    onChange={(event) => {
+                      setReportPeriod(
+                        event.target.value
+                      )
+
+                      setReportError("")
+                    }}
+                  >
+
+                    <option value="weekly">
+                      Weekly
+                    </option>
+
+                    <option value="monthly">
+                      Monthly
+                    </option>
+
+                    <option value="all_time">
+                      All Time
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  className="report-download-button"
+                  onClick={handleDownloadReport}
+                  disabled={reportDownloading}
+                >
+                  <span className="report-button-icon">
+                    ⇩
+                  </span>
+
+                  {reportDownloading
+                    ? "Generating Report..."
+                    : "Download Excel Report"}
+                </button>
+
+              </div>
+
+
+              <div className="report-note">
+                <span className="report-note-dot" />
+
+                Includes a full incident register with status,
+                assignment, timestamps and SLA details, plus
+                Executive Summary, SLA Performance and Team Workload.
+              </div>
+
+
+              {reportError && (
+                <p className="report-error">
+                  {reportError}
+                </p>
+              )}
+
+            </section>
+
+
             {/* -----------------------------------------
                 ANALYTICS KPI CARDS
             ------------------------------------------ */}
 
             <section className="analytics-kpi-grid">
 
-              <div className="analytics-kpi-card">
+              <div className="analytics-kpi-card kpi-compliance">
 
-                <span>
-                  SLA Compliance
-                </span>
+                <div className="analytics-kpi-top">
+                  <span className="analytics-kpi-icon">
+                    ✓
+                  </span>
+
+                  <span className="analytics-kpi-label">
+                    SLA Compliance
+                  </span>
+                </div>
 
                 <strong>
                   {
@@ -571,11 +842,17 @@ function Dashboard() {
               </div>
 
 
-              <div className="analytics-kpi-card">
+              <div className="analytics-kpi-card kpi-resolution">
 
-                <span>
-                  Average Resolution
-                </span>
+                <div className="analytics-kpi-top">
+                  <span className="analytics-kpi-icon">
+                    ◷
+                  </span>
+
+                  <span className="analytics-kpi-label">
+                    Average Resolution
+                  </span>
+                </div>
 
                 <strong>
                   {formatResolutionTime(
@@ -591,11 +868,17 @@ function Dashboard() {
               </div>
 
 
-              <div className="analytics-kpi-card">
+              <div className="analytics-kpi-card kpi-breached">
 
-                <span>
-                  Breached Incidents
-                </span>
+                <div className="analytics-kpi-top">
+                  <span className="analytics-kpi-icon">
+                    !
+                  </span>
+
+                  <span className="analytics-kpi-label">
+                    Breached Incidents
+                  </span>
+                </div>
 
                 <strong>
                   {
@@ -611,11 +894,17 @@ function Dashboard() {
               </div>
 
 
-              <div className="analytics-kpi-card">
+              <div className="analytics-kpi-card kpi-active">
 
-                <span>
-                  Active Incidents
-                </span>
+                <div className="analytics-kpi-top">
+                  <span className="analytics-kpi-icon">
+                    ↗
+                  </span>
+
+                  <span className="analytics-kpi-label">
+                    Active Incidents
+                  </span>
+                </div>
 
                 <strong>
                   {
@@ -641,20 +930,27 @@ function Dashboard() {
 
               {/* PRIORITY */}
 
-              <div className="analytics-panel">
+              <div className="analytics-panel analytics-data-panel">
 
                 <div className="analytics-panel-header">
 
-                  <div>
+                  <div className="panel-heading-with-icon">
 
-                    <h3>
-                      Incidents by Priority
-                    </h3>
+                    <div className="panel-icon panel-icon-violet">
+                      ◈
+                    </div>
 
-                    <p>
-                      Distribution of incident
-                      severity.
-                    </p>
+                    <div>
+
+                      <h3>
+                        Incidents by Priority
+                      </h3>
+
+                      <p>
+                        Distribution of incident severity.
+                      </p>
+
+                    </div>
 
                   </div>
 
@@ -680,7 +976,7 @@ function Dashboard() {
                           )}
                         </span>
 
-                        <strong>
+                        <strong className="analytics-value-pill">
                           {item.count}
                         </strong>
 
@@ -690,7 +986,7 @@ function Dashboard() {
                       <div className="analytics-bar-track">
 
                         <div
-                          className="analytics-bar-fill"
+                          className={`analytics-bar-fill priority-bar priority-${item.label}`}
                           style={{
                             width:
                               `${
@@ -714,20 +1010,27 @@ function Dashboard() {
 
               {/* CATEGORY */}
 
-              <div className="analytics-panel">
+              <div className="analytics-panel analytics-data-panel">
 
                 <div className="analytics-panel-header">
 
-                  <div>
+                  <div className="panel-heading-with-icon">
 
-                    <h3>
-                      Incidents by Category
-                    </h3>
+                    <div className="panel-icon panel-icon-cyan">
+                      ⌘
+                    </div>
 
-                    <p>
-                      Most common service
-                      problem areas.
-                    </p>
+                    <div>
+
+                      <h3>
+                        Incidents by Category
+                      </h3>
+
+                      <p>
+                        Most common service problem areas.
+                      </p>
+
+                    </div>
 
                   </div>
 
@@ -763,7 +1066,7 @@ function Dashboard() {
                             )}
                           </span>
 
-                          <strong>
+                          <strong className="analytics-value-pill">
                             {item.count}
                           </strong>
 
@@ -773,7 +1076,7 @@ function Dashboard() {
                         <div className="analytics-bar-track">
 
                           <div
-                            className="analytics-bar-fill"
+                            className="analytics-bar-fill category-bar"
                             style={{
                               width:
                                 `${
@@ -802,22 +1105,33 @@ function Dashboard() {
                 7 DAY TREND
             ========================================== */}
 
-            <section className="analytics-panel">
+            <section className="analytics-panel trend-panel">
 
               <div className="analytics-panel-header">
 
-                <div>
+                <div className="panel-heading-with-icon">
 
-                  <h3>
-                    7-Day Incident Trend
-                  </h3>
+                  <div className="panel-icon panel-icon-blue">
+                    ↗
+                  </div>
 
-                  <p>
-                    New incidents created during
-                    the last seven days.
-                  </p>
+                  <div>
+
+                    <h3>
+                      7-Day Incident Trend
+                    </h3>
+
+                    <p>
+                      New incidents created during the last seven days.
+                    </p>
+
+                  </div>
 
                 </div>
+
+                <span className="panel-badge panel-badge-soft">
+                  Last 7 days
+                </span>
 
               </div>
 
@@ -888,27 +1202,38 @@ function Dashboard() {
                 AGENT WORKLOAD
             ========================================== */}
 
-            <section className="analytics-panel">
+            <section className="analytics-panel workload-panel">
 
               <div className="analytics-panel-header">
 
-                <div>
+                <div className="panel-heading-with-icon">
 
-                  <h3>
-                    Team Workload
-                  </h3>
+                  <div className="panel-icon panel-icon-violet">
+                    ◎
+                  </div>
 
-                  <p>
-                    Active assigned incidents
-                    across operational staff.
-                  </p>
+                  <div>
+
+                    <h3>
+                      Team Workload
+                    </h3>
+
+                    <p>
+                      Active assigned incidents across operational staff.
+                    </p>
+
+                  </div>
 
                 </div>
+
+                <span className="panel-badge panel-badge-soft">
+                  Live workload
+                </span>
 
               </div>
 
 
-              <div className="analytics-list">
+              <div className="analytics-list workload-list">
 
                 {analytics
                   .agent_workload
@@ -925,42 +1250,52 @@ function Dashboard() {
                     .map((member) => (
 
                     <div
-                      className="analytics-list-item"
+                      className="analytics-list-item workload-item"
                       key={member.user_id}
                     >
 
-                      <div className="analytics-list-row">
+                      <div className="analytics-list-row workload-list-row">
 
-                        <div className="workload-user">
+                        <div className="workload-user-row">
 
-                          <strong>
-                            {member.name}
-                          </strong>
+                          <div className="workload-avatar">
+                            {member.name
+                              ?.charAt(0)
+                              ?.toUpperCase()}
+                          </div>
 
-                          <span>
-                            {formatLabel(
-                              member.role
-                            )}
-                          </span>
+                          <div className="workload-user">
+
+                            <strong>
+                              {member.name}
+                            </strong>
+
+                            <span>
+                              {formatLabel(
+                                member.role
+                              )}
+                            </span>
+
+                          </div>
 
                         </div>
 
 
-                        <strong>
+                        <span className="workload-count">
                           {
                             member
                               .active_incidents
                           }{" "}
                           active
-                        </strong>
+                        </span>
 
                       </div>
 
 
-                      <div className="analytics-bar-track">
+                      <div className="analytics-bar-track workload-track">
 
                         <div
-                          className="analytics-bar-fill"
+                          className="analytics-bar-fill workload-bar"
                           style={{
                             width:
                               `${

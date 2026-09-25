@@ -32,6 +32,7 @@ from app.schemas.incident import (
 from app.history import record_incident_history
 from app.notifications import create_notification
 from app.sla import close_incident_escalations
+from app.automation import find_matching_automation_rule
 
 
 router = APIRouter(
@@ -115,6 +116,55 @@ def create_incident(
         old_value=None,
         new_value=incident.ticket_number
     )
+
+    # -------------------------------------------------
+    # AUTOMATIC ROUTING
+    # -------------------------------------------------
+
+    automation_rule, automation_assignee = (
+        find_matching_automation_rule(
+            db=db,
+            incident=incident
+        )
+    )
+
+    if automation_rule and automation_assignee:
+        old_status = incident.status
+
+        incident.assigned_to = automation_assignee.id
+        incident.status = "assigned"
+
+        record_incident_history(
+            db=db,
+            organization_id=current_user.organization_id,
+            incident_id=incident.id,
+            actor_id=current_user.id,
+            event_type="incident_assigned",
+            old_value=None,
+            new_value=str(automation_assignee.id)
+        )
+
+        record_incident_history(
+            db=db,
+            organization_id=current_user.organization_id,
+            incident_id=incident.id,
+            actor_id=current_user.id,
+            event_type="status_changed",
+            old_value=old_status,
+            new_value="assigned"
+        )
+
+        create_notification(
+            db=db,
+            organization_id=current_user.organization_id,
+            user_id=automation_assignee.id,
+            incident_id=incident.id,
+            notification_type="incident_assigned",
+            message=(
+                f"{incident.ticket_number} "
+                "was automatically assigned to you."
+            )
+        )
 
     db.commit()
     db.refresh(incident)
@@ -278,7 +328,6 @@ def assign_incident(
             detail="Incident not found."
         )
 
-    # Closed incidents must not be reassigned.
     if incident.status == "closed":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -401,7 +450,6 @@ def update_incident_status(
             detail="Incident not found."
         )
 
-    # Agents can only update incidents assigned to themselves
     if (
         current_user.role == "agent"
         and incident.assigned_to != current_user.id

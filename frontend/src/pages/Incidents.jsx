@@ -14,7 +14,6 @@ function Incidents() {
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
 
-  // Create incident
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -22,12 +21,10 @@ function Incidents() {
   const [priority, setPriority] = useState("medium")
   const [creating, setCreating] = useState(false)
 
-  // Search + filters
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [priorityFilter, setPriorityFilter] = useState("")
 
-  // Pagination
   const [page, setPage] = useState(1)
   const [hasNext, setHasNext] = useState(false)
 
@@ -38,9 +35,6 @@ function Incidents() {
 
       const params = {
         skip: (targetPage - 1) * PAGE_SIZE,
-
-        // Fetch one extra record so we know
-        // whether another page exists.
         limit: PAGE_SIZE + 1,
       }
 
@@ -78,8 +72,6 @@ function Incidents() {
   }
 
   useEffect(() => {
-    // Small delay prevents an API request
-    // on every single keystroke.
     const timer = setTimeout(() => {
       fetchIncidents(page)
     }, 300)
@@ -122,8 +114,6 @@ function Incidents() {
         "Incident created successfully."
       )
 
-      // Newly created incidents are newest,
-      // so return to page 1.
       if (page !== 1) {
         setPage(1)
       } else {
@@ -167,492 +157,536 @@ function Incidents() {
   return (
     <div className="incidents-page">
 
-      {/* HEADER */}
-      <div className="incidents-header">
+      <div className="incidents-page-glow incidents-page-glow-one" />
+      <div className="incidents-page-glow incidents-page-glow-two" />
 
-        <div>
-          <button
-            className="back-button"
-            onClick={() =>
-              navigate("/dashboard")
-            }
-          >
-            ← Dashboard
-          </button>
+      <div className="incidents-shell">
 
-          <h1>Incidents</h1>
+        <header className="incidents-header">
 
-          <p>
-            Create, search and manage incident tickets.
-          </p>
-        </div>
-
-        <button
-          className="create-incident-button"
-          onClick={() => {
-            setShowForm(true)
-            setError("")
-            setMessage("")
-          }}
-        >
-          + New Incident
-        </button>
-
-      </div>
-
-
-      {/* SUCCESS / ERROR */}
-
-      {message && (
-        <div className="incidents-message">
-          {message}
-        </div>
-      )}
-
-      {error && (
-        <div className="incidents-error">
-          {error}
-        </div>
-      )}
-
-
-      {/* CREATE INCIDENT FORM */}
-
-      {showForm && (
-        <div className="incident-form-card">
-
-          <div className="incident-form-header">
-
-            <h2>Create Incident</h2>
+          <div className="incidents-heading-group">
 
             <button
-              type="button"
-              className="close-form-button"
+              className="back-button"
               onClick={() =>
-                setShowForm(false)
+                navigate("/dashboard")
               }
             >
-              ×
+              <span className="back-button-icon">
+                ←
+              </span>
+              Dashboard
             </button>
+
+            <div className="incidents-title-row">
+
+              <div className="incidents-title-icon">
+                !
+              </div>
+
+              <div>
+                <p className="incidents-eyebrow">
+                  SERVICE OPERATIONS
+                </p>
+
+                <h1>
+                  Incidents
+                </h1>
+
+                <p>
+                  Create, search and manage incident tickets.
+                </p>
+              </div>
+
+            </div>
 
           </div>
 
-          <form onSubmit={handleCreateIncident}>
+          <button
+            className="create-incident-button"
+            onClick={() => {
+              setShowForm(true)
+              setError("")
+              setMessage("")
+            }}
+          >
+            <span className="create-button-icon">
+              +
+            </span>
+            New Incident
+          </button>
 
-            <div className="incident-form-group">
+        </header>
 
-              <label>Title</label>
+        {message && (
+          <div className="incidents-message incidents-success">
+            <span className="feedback-icon">
+              ✓
+            </span>
 
-              <input
-                type="text"
-                value={title}
-                onChange={(event) =>
-                  setTitle(event.target.value)
+            <span>
+              {message}
+            </span>
+          </div>
+        )}
+
+        {error && (
+          <div className="incidents-error">
+            <span className="feedback-icon">
+              !
+            </span>
+
+            <span>
+              {error}
+            </span>
+          </div>
+        )}
+
+        {showForm && (
+          <section className="incident-form-card">
+
+            <div className="incident-form-header">
+
+              <div>
+                <span className="form-kicker">
+                  NEW INCIDENT
+                </span>
+
+                <h2>
+                  Create Incident
+                </h2>
+
+                <p>
+                  Add the incident details and set an initial priority.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="close-form-button"
+                onClick={() =>
+                  setShowForm(false)
                 }
-                placeholder="Example: Payment gateway issue"
-                required
-              />
+                aria-label="Close incident form"
+              >
+                ×
+              </button>
 
             </div>
 
-
-            <div className="incident-form-group">
-
-              <label>Description</label>
-
-              <textarea
-                value={description}
-                onChange={(event) =>
-                  setDescription(event.target.value)
-                }
-                placeholder="Describe the incident..."
-                rows="4"
-              />
-
-            </div>
-
-
-            <div className="incident-form-row">
+            <form onSubmit={handleCreateIncident}>
 
               <div className="incident-form-group">
 
-                <label>Category</label>
+                <label>
+                  Title
+                </label>
 
                 <input
                   type="text"
-                  value={category}
+                  value={title}
                   onChange={(event) =>
-                    setCategory(event.target.value)
+                    setTitle(event.target.value)
                   }
-                  placeholder="Example: Payments"
+                  placeholder="Example: Payment gateway issue"
+                  required
                 />
 
               </div>
 
-
               <div className="incident-form-group">
 
-                <label>Priority</label>
+                <label>
+                  Description
+                </label>
 
-                <select
-                  value={priority}
+                <textarea
+                  value={description}
                   onChange={(event) =>
-                    setPriority(event.target.value)
+                    setDescription(event.target.value)
                   }
-                >
-                  <option value="low">
-                    Low
-                  </option>
-
-                  <option value="medium">
-                    Medium
-                  </option>
-
-                  <option value="high">
-                    High
-                  </option>
-
-                  <option value="critical">
-                    Critical
-                  </option>
-                </select>
+                  placeholder="Describe the incident..."
+                  rows="4"
+                />
 
               </div>
 
+              <div className="incident-form-row">
+
+                <div className="incident-form-group">
+
+                  <label>
+                    Category
+                  </label>
+
+                  <input
+                    type="text"
+                    value={category}
+                    onChange={(event) =>
+                      setCategory(event.target.value)
+                    }
+                    placeholder="Example: Payments"
+                  />
+
+                </div>
+
+                <div className="incident-form-group">
+
+                  <label>
+                    Priority
+                  </label>
+
+                  <select
+                    value={priority}
+                    onChange={(event) =>
+                      setPriority(event.target.value)
+                    }
+                  >
+                    <option value="low">
+                      Low
+                    </option>
+
+                    <option value="medium">
+                      Medium
+                    </option>
+
+                    <option value="high">
+                      High
+                    </option>
+
+                    <option value="critical">
+                      Critical
+                    </option>
+                  </select>
+
+                </div>
+
+              </div>
+
+              <div className="incident-form-actions">
+
+                <button
+                  type="button"
+                  className="cancel-button"
+                  onClick={() =>
+                    setShowForm(false)
+                  }
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="create-incident-button form-submit-button"
+                  disabled={creating}
+                >
+                  {creating
+                    ? "Creating..."
+                    : "Create Incident"}
+                </button>
+
+              </div>
+
+            </form>
+
+          </section>
+        )}
+
+        <section className="incident-toolbar">
+
+          <div className="incident-toolbar-heading">
+
+            <div>
+              <p className="toolbar-kicker">
+                INCIDENT QUEUE
+              </p>
+
+              <h2>
+                Find and filter tickets
+              </h2>
             </div>
 
+            <span className="toolbar-page-pill">
+              Page {page}
+            </span>
 
-            <div className="incident-form-actions">
+          </div>
 
-              <button
-                type="button"
-                className="cancel-button"
-                onClick={() =>
-                  setShowForm(false)
-                }
-              >
-                Cancel
-              </button>
+          <div className="incident-filters">
 
-              <button
-                type="submit"
-                className="create-incident-button"
-                disabled={creating}
-              >
-                {creating
-                  ? "Creating..."
-                  : "Create Incident"}
-              </button>
+            <div className="search-field">
+
+              <span className="search-field-icon">
+                ⌕
+              </span>
+
+              <input
+                type="text"
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value)
+                  setPage(1)
+                }}
+                placeholder="Search ticket, title or category..."
+              />
 
             </div>
 
-          </form>
+            <div className="select-field">
 
-        </div>
-      )}
+              <span className="filter-label">
+                Status
+              </span>
 
+              <select
+                value={statusFilter}
+                onChange={(event) => {
+                  setStatusFilter(event.target.value)
+                  setPage(1)
+                }}
+              >
+                <option value="">
+                  All Statuses
+                </option>
 
-      {/* SEARCH + FILTERS */}
+                <option value="open">
+                  Open
+                </option>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "minmax(220px, 2fr) 1fr 1fr auto",
-          gap: "12px",
-          alignItems: "center",
-          marginBottom: "20px",
-          padding: "18px",
-          background: "#ffffff",
-          border: "1px solid #e2e8f0",
-          borderRadius: "12px",
-        }}
-      >
+                <option value="assigned">
+                  Assigned
+                </option>
 
-        <input
-          type="text"
-          value={search}
-          onChange={(event) => {
-            setSearch(event.target.value)
-            setPage(1)
-          }}
-          placeholder="Search ticket, title or category..."
-          style={{
-            height: "44px",
-            padding: "0 12px",
-            border: "1px solid #cbd5e1",
-            borderRadius: "8px",
-            fontSize: "14px",
-          }}
-        />
+                <option value="in_progress">
+                  In Progress
+                </option>
 
+                <option value="resolved">
+                  Resolved
+                </option>
 
-        <select
-          value={statusFilter}
-          onChange={(event) => {
-            setStatusFilter(event.target.value)
-            setPage(1)
-          }}
-          style={{
-            height: "44px",
-            padding: "0 12px",
-            border: "1px solid #cbd5e1",
-            borderRadius: "8px",
-            background: "white",
-          }}
-        >
+                <option value="closed">
+                  Closed
+                </option>
+              </select>
 
-          <option value="">
-            All Statuses
-          </option>
+            </div>
 
-          <option value="open">
-            Open
-          </option>
+            <div className="select-field">
 
-          <option value="assigned">
-            Assigned
-          </option>
+              <span className="filter-label">
+                Priority
+              </span>
 
-          <option value="in_progress">
-            In Progress
-          </option>
+              <select
+                value={priorityFilter}
+                onChange={(event) => {
+                  setPriorityFilter(
+                    event.target.value
+                  )
+                  setPage(1)
+                }}
+              >
+                <option value="">
+                  All Priorities
+                </option>
 
-          <option value="resolved">
-            Resolved
-          </option>
+                <option value="low">
+                  Low
+                </option>
 
-          <option value="closed">
-            Closed
-          </option>
+                <option value="medium">
+                  Medium
+                </option>
 
-        </select>
+                <option value="high">
+                  High
+                </option>
 
+                <option value="critical">
+                  Critical
+                </option>
+              </select>
 
-        <select
-          value={priorityFilter}
-          onChange={(event) => {
-            setPriorityFilter(
-              event.target.value
-            )
-            setPage(1)
-          }}
-          style={{
-            height: "44px",
-            padding: "0 12px",
-            border: "1px solid #cbd5e1",
-            borderRadius: "8px",
-            background: "white",
-          }}
-        >
+            </div>
 
-          <option value="">
-            All Priorities
-          </option>
+            <button
+              type="button"
+              className="reset-filters-button"
+              onClick={handleResetFilters}
+            >
+              Reset
+            </button>
 
-          <option value="low">
-            Low
-          </option>
+          </div>
 
-          <option value="medium">
-            Medium
-          </option>
+        </section>
 
-          <option value="high">
-            High
-          </option>
+        {loading ? (
+          <div className="incidents-message loading-card">
 
-          <option value="critical">
-            Critical
-          </option>
+            <div className="loading-dot" />
 
-        </select>
+            Loading incidents...
 
+          </div>
+        ) : incidents.length === 0 ? (
+          <div className="empty-incidents">
 
-        <button
-          type="button"
-          onClick={handleResetFilters}
-          style={{
-            height: "44px",
-            padding: "0 18px",
-            border: "1px solid #cbd5e1",
-            borderRadius: "8px",
-            background: "white",
-            cursor: "pointer",
-            fontWeight: "600",
-          }}
-        >
-          Reset
-        </button>
+            <div className="empty-icon">
+              !
+            </div>
+
+            <h3>
+              No incidents found
+            </h3>
+
+            <p>
+              Try changing your search or filters.
+            </p>
+
+          </div>
+        ) : (
+          <section className="incidents-table-container">
+
+            <div className="table-card-header">
+
+              <div>
+                <p className="table-card-kicker">
+                  CURRENT RESULTS
+                </p>
+
+                <h2>
+                  Incident queue
+                </h2>
+              </div>
+
+              <span className="result-count-pill">
+                {incidents.length} shown
+              </span>
+
+            </div>
+
+            <div className="incidents-table-scroll">
+
+              <table className="incidents-table">
+
+                <thead>
+                  <tr>
+                    <th>Ticket</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                  {incidents.map((incident) => (
+                    <tr key={incident.id}>
+
+                      <td>
+                        <button
+                          type="button"
+                          className="ticket-link"
+                          onClick={() =>
+                            navigate(
+                              `/incidents/${incident.id}`
+                            )
+                          }
+                        >
+                          {incident.ticket_number}
+                        </button>
+                      </td>
+
+                      <td className="incident-title-cell">
+                        {incident.title}
+                      </td>
+
+                      <td>
+                        <span className="category-value">
+                          {incident.category || "—"}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`priority-badge ${incident.priority}`}
+                        >
+                          <span className="badge-dot" />
+                          {formatStatus(
+                            incident.priority
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`status-badge ${incident.status}`}
+                        >
+                          {formatStatus(
+                            incident.status
+                          )}
+                        </span>
+                      </td>
+
+                      <td className="created-date-cell">
+                        {formatDate(
+                          incident.created_at
+                        )}
+                      </td>
+
+                    </tr>
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+        )}
+
+        {!loading && incidents.length > 0 && (
+          <div className="pagination-row">
+
+            <button
+              type="button"
+              className="pagination-button"
+              disabled={page === 1}
+              onClick={() =>
+                setPage((current) =>
+                  Math.max(1, current - 1)
+                )
+              }
+            >
+              ← Previous
+            </button>
+
+            <span className="pagination-current">
+              Page {page}
+            </span>
+
+            <button
+              type="button"
+              className="pagination-button"
+              disabled={!hasNext}
+              onClick={() =>
+                setPage((current) =>
+                  current + 1
+                )
+              }
+            >
+              Next →
+            </button>
+
+          </div>
+        )}
 
       </div>
-
-
-      {/* INCIDENT TABLE */}
-
-      {loading ? (
-        <div className="incidents-message">
-          Loading incidents...
-        </div>
-      ) : incidents.length === 0 ? (
-        <div className="empty-incidents">
-
-          <h3>No incidents found</h3>
-
-          <p>
-            Try changing your search or filters.
-          </p>
-
-        </div>
-      ) : (
-        <div className="incidents-table-container">
-
-          <table className="incidents-table">
-
-            <thead>
-              <tr>
-                <th>Ticket</th>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Created</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {incidents.map((incident) => (
-                <tr key={incident.id}>
-
-                  <td>
-                    <button
-                      type="button"
-                      className="ticket-link"
-                      onClick={() =>
-                        navigate(
-                          `/incidents/${incident.id}`
-                        )
-                      }
-                    >
-                      {incident.ticket_number}
-                    </button>
-                  </td>
-
-                  <td>
-                    {incident.title}
-                  </td>
-
-                  <td>
-                    {incident.category || "—"}
-                  </td>
-
-                  <td>
-                    <span
-                      className={`priority-badge ${incident.priority}`}
-                    >
-                      {formatStatus(
-                        incident.priority
-                      )}
-                    </span>
-                  </td>
-
-                  <td>
-                    <span
-                      className={`status-badge ${incident.status}`}
-                    >
-                      {formatStatus(
-                        incident.status
-                      )}
-                    </span>
-                  </td>
-
-                  <td>
-                    {formatDate(
-                      incident.created_at
-                    )}
-                  </td>
-
-                </tr>
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-      )}
-
-
-      {/* PAGINATION */}
-
-      {!loading && incidents.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "14px",
-            marginTop: "22px",
-          }}
-        >
-
-          <button
-            type="button"
-            disabled={page === 1}
-            onClick={() =>
-              setPage((current) =>
-                Math.max(1, current - 1)
-              )
-            }
-            style={{
-              padding: "9px 16px",
-              border: "1px solid #cbd5e1",
-              borderRadius: "8px",
-              background:
-                page === 1
-                  ? "#f1f5f9"
-                  : "white",
-              cursor:
-                page === 1
-                  ? "not-allowed"
-                  : "pointer",
-            }}
-          >
-            ← Previous
-          </button>
-
-
-          <strong>
-            Page {page}
-          </strong>
-
-
-          <button
-            type="button"
-            disabled={!hasNext}
-            onClick={() =>
-              setPage((current) =>
-                current + 1
-              )
-            }
-            style={{
-              padding: "9px 16px",
-              border: "1px solid #cbd5e1",
-              borderRadius: "8px",
-              background: !hasNext
-                ? "#f1f5f9"
-                : "white",
-              cursor: !hasNext
-                ? "not-allowed"
-                : "pointer",
-            }}
-          >
-            Next →
-          </button>
-
-        </div>
-      )}
 
     </div>
   )

@@ -13,6 +13,7 @@ import IncidentDetails from "./pages/IncidentDetails"
 import Team from "./pages/Team"
 import Notifications from "./pages/Notifications"
 import SLAPolicies from "./pages/SLAPolicies"
+import AutomationRules from "./pages/AutomationRules"
 
 import ProtectedRoute from "./components/ProtectedRoute"
 import RoleProtectedRoute from "./components/RoleProtectedRoute"
@@ -110,6 +111,25 @@ function App() {
                 ]}
               >
                 <SLAPolicies />
+              </RoleProtectedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* Automation Rules - ADMIN + MANAGER */}
+
+        <Route
+          path="/automation-rules"
+          element={
+            <ProtectedRoute>
+              <RoleProtectedRoute
+                allowedRoles={[
+                  "admin",
+                  "manager",
+                ]}
+              >
+                <AutomationRules />
               </RoleProtectedRoute>
             </ProtectedRoute>
           }

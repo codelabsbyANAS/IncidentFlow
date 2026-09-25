@@ -1,6 +1,6 @@
-# IncidentFlow
+# ResolveOps
 
-IncidentFlow is a multi-tenant Incident and SLA Management Platform built with FastAPI, PostgreSQL, Redis, Celery, and Docker.
+ResolveOps is a multi-tenant Incident and SLA Management Platform built with FastAPI, PostgreSQL, Redis, Celery, and Docker.
 
 It is designed as a backend system for organizations that need to manage support incidents, assign tickets to staff, track SLA deadlines, create escalations, maintain incident history, and send user notifications.
 
@@ -62,7 +62,7 @@ CLOSED
 
 ### Incident History
 
-IncidentFlow records important ticket events, including:
+ResolveOps records important ticket events, including:
 
 - Incident creation
 - Assignment
@@ -87,7 +87,7 @@ Response: 1 hour
 Resolution: 8 hours
 ```
 
-IncidentFlow automatically calculates:
+ResolveOps automatically calculates:
 
 - Response deadlines
 - Resolution deadlines
@@ -105,7 +105,7 @@ not_configured
 
 ### SLA Escalations
 
-IncidentFlow automatically creates SLA escalation records when deadlines are breached.
+ResolveOps automatically creates SLA escalation records when deadlines are breached.
 
 Features include:
 
